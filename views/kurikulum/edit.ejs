@@ -1,0 +1,49 @@
+<% layout('layout') -%>
+
+<h3>Edit Kurikulum</h3>
+
+<form method="POST" action="/edit/<%= kurikulum.id %>">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="nama_kurikulum" class="form-label">Nama Kurikulum</label>
+                <input type="text" class="form-control" id="nama_kurikulum" name="nama_kurikulum" 
+                       value="<%= kurikulum.nama_kurikulum %>" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="tahun_pelajaran" class="form-label">Tahun Pelajaran</label>
+                <input type="text" class="form-control" id="tahun_pelajaran" name="tahun_pelajaran" 
+                       value="<%= kurikulum.tahun_pelajaran %>" placeholder="Contoh: 2023/2024" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="tingkat_pendidikan" class="form-label">Tingkat Pendidikan</label>
+                <select class="form-select" id="tingkat_pendidikan" name="tingkat_pendidikan" required>
+                    <option value="">Pilih Tingkat Pendidikan</option>
+                    <option value="SMA" <%= kurikulum.tingkat_pendidikan === 'SMA' ? 'selected' : '' %>>SMA</option>
+                    <option value="SMK" <%= kurikulum.tingkat_pendidikan === 'SMK' ? 'selected' : '' %>>SMK</option>
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="tanggal_berlaku" class="form-label">Tanggal Berlaku</label>
+                <input type="date" class="form-control" id="tanggal_berlaku" name="tanggal_berlaku" 
+                       value="<%= kurikulum.tanggal_berlaku %>" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="aktif" <%= kurikulum.status === 'aktif' ? 'selected' : '' %>>Aktif</option>
+                    <option value="tidak aktif" <%= kurikulum.status === 'tidak aktif' ? 'selected' : '' %>>Tidak Aktif</option>
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">Update Kurikulum</button>
+                <a href="/" class="btn btn-secondary">Batal</a>
+            </div>
+        </div>
+    </div>
+</form>

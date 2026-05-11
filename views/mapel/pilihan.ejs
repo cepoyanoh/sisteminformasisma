@@ -1,0 +1,106 @@
+<% layout('layout') -%>
+
+<div class="dashboard-content">
+    <!-- Alert Messages -->
+    <% if (success && success.length > 0) { %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i><%= success[0] %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+    
+    <% if (error && error.length > 0) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i><%= error[0] %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="bi bi-star-fill me-2 text-warning"></i>Mata Pelajaran Pilihan</h2>
+            <p class="text-muted mb-0">Daftar mata pelajaran yang dapat dipilih oleh siswa sebagai pilihan tambahan</p>
+        </div>
+        <a href="/mapel" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left me-2"></i>Kembali ke Daftar Mapel
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <% if (mapelPilihanList && mapelPilihanList.length > 0) { %>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <span class="badge bg-warning text-dark fs-6">
+                            <i class="bi bi-star-fill me-1"></i>
+                            Total: <%= mapelPilihanList.length %> mata pelajaran pilihan
+                        </span>
+                    </div>
+                </div>
+            <% } %>
+            
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>No</th>
+                            <th>Kode</th>
+                            <th>Nama Mata Pelajaran</th>
+                            <th>Kategori</th>
+                            <th>Kelas</th>
+                            <th>Jam Pelajaran</th>
+                            <th>Guru Pengampu</th>
+                            <th>Kurikulum</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (mapelPilihanList && mapelPilihanList.length > 0) { %>
+                            <% mapelPilihanList.forEach((mapel, index) => { %>
+                                <tr>
+                                    <td><%= index + 1 %></td>
+                                    <td><span class="badge bg-secondary"><%= mapel.kode_mapel %></span></td>
+                                    <td>
+                                        <strong><%= mapel.nama_mapel %></strong>
+                                        <span class="badge bg-warning text-dark ms-2">
+                                            <i class="bi bi-star-fill"></i> Pilihan
+                                        </span>
+                                    </td>
+                                    <td><%= mapel.kategori %></td>
+                                    <td><span class="badge bg-info">Kelas <%= mapel.kelas %></span></td>
+                                    <td><%= mapel.jam_pembelajaran %> JP</td>
+                                    <td><%= mapel.guru_pengampu_nama || '-' %></td>
+                                    <td><%= mapel.nama_kurikulum || '-' %></td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="/mapel/edit/<%= mapel.id %>" class="btn btn-sm btn-outline-primary" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="/mapel/toggle-pilihan/<%= mapel.id %>" class="btn btn-sm btn-outline-secondary" 
+                                               onclick="return confirm('Ubah <%= mapel.nama_mapel %> menjadi Mata Pelajaran Wajib?')" title="Ubah ke Mapel Wajib">
+                                                <i class="bi bi-star"></i>
+                                            </a>
+                                            <a href="/mapel/hapus/<%= mapel.id %>" class="btn btn-sm btn-outline-danger" 
+                                               onclick="return confirm('Apakah Anda yakin ingin menghapus <%= mapel.nama_mapel %> dari daftar mapel pilihan?')" title="Hapus">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="9" class="text-center text-muted py-5">
+                                    <i class="bi bi-star" style="font-size: 3rem; display: block; margin-bottom: 1rem; color: #ffc107;"></i>
+                                    <h5 class="text-muted">Belum ada Mata Pelajaran Pilihan</h5>
+                                    <p class="mb-0">Silakan <a href="/mapel/tambah">tambah mata pelajaran baru</a> dan tandai sebagai mapel pilihan</p>
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>

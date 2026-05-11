@@ -1,0 +1,38 @@
+<% layout('layout') -%>
+
+<div class="dashboard-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-plus-circle me-2 text-primary"></i><%= heading %></h2>
+        <a href="/absensi" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Kembali
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <form method="GET" action="/absensi/input" class="row g-3">
+                <div class="col-md-6">
+                    <label for="tanggal" class="form-label">Tanggal <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="tanggal" name="tanggal" 
+                           value="<%= selectedTanggal %>" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="kelas_id" class="form-label">Kelas <span class="text-danger">*</span></label>
+                    <select class="form-select" id="kelas_id" name="kelas_id" required>
+                        <option value="">Pilih Kelas</option>
+                        <% kelasList.forEach(kelas => { %>
+                            <option value="<%= kelas.id %>">
+                                <%= kelas.nama_kelas %>
+                            </option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-arrow-right me-2"></i>Lanjut Input Absensi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

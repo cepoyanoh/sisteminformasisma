@@ -1,0 +1,202 @@
+<% layout('layout') -%>
+
+<div class="dashboard-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-calendar-day me-2 text-primary"></i><%= heading %></h2>
+        <div class="d-flex gap-2">
+            <% if (rekapHarian && rekapHarian.length > 0) { %>
+                <a href="/absensi/rekap-harian/export?tanggal=<%= selectedTanggal %>&kelas_id=<%= selectedKelas %>" 
+                   class="btn btn-success">
+                    <i class="bi bi-file-earmark-spreadsheet me-2"></i>Export Excel
+                </a>
+            <% } %>
+            <a href="/" class="btn btn-outline-secondary">
+                <i class="bi bi-house-door me-2"></i>Dashboard
+            </a>
+            <a href="/absensi" class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Kembali
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" action="/absensi/rekap-harian" class="row g-3">
+                <div class="col-md-4">
+                    <label for="tanggal" class="form-label">Tanggal</label>
+                    <input type="date" class="form-control" id="tanggal" name="tanggal" 
+                           value="<%= selectedTanggal %>">
+                </div>
+                <div class="col-md-5">
+                    <label for="kelas_id" class="form-label">Kelas</label>
+                    <select class="form-select" id="kelas_id" name="kelas_id">
+                        <option value="">-- Pilih Kelas --</option>
+                        <% if (kelasList && kelasList.length > 0) { %>
+                            <% kelasList.forEach(kelas => { %>
+                                <option value="<%= kelas.id %>" <%= selectedKelas == kelas.id ? 'selected' : '' %>>
+                                    <%= kelas.nama_kelas %>
+                                </option>
+                            <% }); %>
+                        <% } %>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-2"></i>Tampilkan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <% if (summary) { %>
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-1">Hadir</h6>
+                                <h2 class="mb-0"><%= summary.totalHadir %></h2>
+                            </div>
+                            <i class="bi bi-check-circle" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-1">Sakit</h6>
+                                <h2 class="mb-0"><%= summary.totalSakit %></h2>
+                            </div>
+                            <i class="bi bi-thermometer-half" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-1">Izin</h6>
+                                <h2 class="mb-0"><%= summary.totalIzin %></h2>
+                            </div>
+                            <i class="bi bi-envelope" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-1">Tidak Hadir</h6>
+                                <h2 class="mb-0"><%= summary.totalAlpha %></h2>
+                            </div>
+                            <i class="bi bi-x-circle" style="font-size: 2.5rem; opacity: 0.3;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% } %>
+
+    <!-- Tabel Rekap Harian -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <% if (selectedTanggal && selectedKelas) { %>
+                <h5 class="mb-3">
+                    Rekap Harian: <%= new Date(selectedTanggal).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %>
+                    <% if (kelas) { %>
+                        <span class="badge bg-primary ms-2"><%= kelas.nama_kelas %></span>
+                    <% } %>
+                </h5>
+                
+                <% if (rekapHarian && rekapHarian.length > 0) { %>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th rowspan="2" class="align-middle">No</th>
+                                    <th rowspan="2" class="align-middle">NIS</th>
+                                    <th rowspan="2" class="align-middle">Nama Siswa</th>
+                                    <th colspan="4" class="text-center">Status Kehadiran per Mapel</th>
+                                </tr>
+                                <tr>
+                                    <th class="text-center bg-success text-white">Hadir</th>
+                                    <th class="text-center bg-warning text-dark">Sakit</th>
+                                    <th class="text-center bg-info text-white">Izin</th>
+                                    <th class="text-center bg-danger text-white">Alpha</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% rekapHarian.forEach((siswa, index) => { %>
+                                    <tr>
+                                        <td rowspan="<%= Math.max(siswa.records.length, 1) + 1 %>"><%= index + 1 %></td>
+                                        <td rowspan="<%= Math.max(siswa.records.length, 1) + 1 %>"><%= siswa.nis || '-' %></td>
+                                        <td rowspan="<%= Math.max(siswa.records.length, 1) + 1 %>"><strong><%= siswa.nama_siswa %></strong></td>
+                                        <td class="text-center" rowspan="<%= Math.max(siswa.records.length, 1) + 1 %>">
+                                            <span class="badge bg-success"><%= siswa.hadir %></span>
+                                        </td>
+                                        <td class="text-center" rowspan="<%= Math.max(siswa.records.length, 1) + 1 %>">
+                                            <span class="badge bg-warning text-dark"><%= siswa.sakit %></span>
+                                        </td>
+                                        <td class="text-center" rowspan="<%= Math.max(siswa.records.length, 1) + 1 %>">
+                                            <span class="badge bg-info"><%= siswa.izin %></span>
+                                        </td>
+                                        <td class="text-center" rowspan="<%= Math.max(siswa.records.length, 1) + 1 %>">
+                                            <span class="badge bg-danger"><%= siswa.alpha %></span>
+                                        </td>
+                                    </tr>
+                                    
+                                    <!-- Detail Mapel -->
+                                    <% if (siswa.records.length > 0) { %>
+                                        <% siswa.records.forEach(record => { %>
+                                            <tr class="table-light">
+                                                <td colspan="6">
+                                                    <small>
+                                                        <i class="bi bi-book me-1"></i><strong><%= record.mapel %></strong>
+                                                        <span class="text-muted mx-2">|</span>
+                                                        <i class="bi bi-person me-1"></i><%= record.guru %>
+                                                        <% if (record.keterangan && record.keterangan.trim() !== '') { %>
+                                                            <span class="text-muted mx-2">|</span>
+                                                            <em><%= record.keterangan %></em>
+                                                        <% } %>
+                                                    </small>
+                                                </td>
+                                            </tr>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <tr class="table-light">
+                                            <td colspan="6" class="text-muted">
+                                                <small><em>Tidak ada data absensi</em></small>
+                                            </td>
+                                        </tr>
+                                    <% } %>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } else { %>
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-inbox" style="font-size: 4rem; display: block; margin-bottom: 1rem;"></i>
+                        <h5>Belum ada data absensi untuk tanggal yang dipilih</h5>
+                        <p class="mt-2">Silakan input absensi terlebih dahulu melalui menu Input Absensi</p>
+                    </div>
+                <% } %>
+            <% } else { %>
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-calendar-check" style="font-size: 4rem; display: block; margin-bottom: 1rem;"></i>
+                    <h5>Silakan pilih tanggal dan kelas untuk melihat rekap harian</h5>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>

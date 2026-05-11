@@ -1,0 +1,40 @@
+<% layout('layout') -%>
+
+<h3>Tambah Kelas Baru</h3>
+
+<form method="POST" action="/kelas/tambah">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="nama_kelas" class="form-label">Nama Kelas</label>
+                <input type="text" class="form-control" id="nama_kelas" name="nama_kelas" placeholder="Contoh: XII IPA 1" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="wali_kelas" class="form-label">Wali Kelas</label>
+                <select class="form-select" id="wali_kelas" name="wali_kelas">
+                    <option value="">Pilih Wali Kelas</option>
+                    <% guruList.forEach(guru => { %>
+                        <option value="<%= guru.id %>"><%= guru.nama_guru %> (<%= guru.nip %>)</option>
+                    <% }) %>
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="tahun_pelajaran" class="form-label">Tahun Pelajaran</label>
+                <input type="text" class="form-control" id="tahun_pelajaran" name="tahun_pelajaran" placeholder="Contoh: 2023/2024" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="jumlah_siswa" class="form-label">Jumlah Siswa</label>
+                <input type="number" class="form-control" id="jumlah_siswa" name="jumlah_siswa" min="0" placeholder="Akan dihitung otomatis" value="0" readonly disabled>
+                <small class="text-muted">Jumlah siswa akan dihitung otomatis berdasarkan data siswa yang terdaftar di kelas ini</small>
+            </div>
+            
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">Simpan Kelas</button>
+                <a href="/kelas" class="btn btn-secondary">Batal</a>
+            </div>
+        </div>
+    </div>
+</form>

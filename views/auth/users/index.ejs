@@ -1,0 +1,223 @@
+<% layout('layout') -%>
+
+<div class="dashboard-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-people me-2 text-primary"></i>Manajemen User</h2>
+        <div class="d-flex gap-2">
+            <a href="/" class="btn btn-outline-secondary">
+                <i class="bi bi-house-door me-2"></i>Dashboard
+            </a>
+            <% if (user && user.role === 'super_admin') { %>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="bi bi-lightning me-2"></i>Generate Akun
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="/users/generate/guru" 
+                               onclick="return confirm('Generate akun untuk semua guru?\nUsername & Password = NIP')">
+                                <i class="bi bi-person-badge me-2"></i>Generate Akun Guru
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/users/generate/siswa"
+                               onclick="return confirm('Generate akun untuk semua siswa?\nUsername & Password = NISN')">
+                                <i class="bi bi-person-vcard me-2"></i>Generate Akun Siswa
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="/users/generate/all"
+                               onclick="return confirm('Generate akun untuk SEMUA guru dan siswa?')">
+                                <i class="bi bi-people-fill me-2"></i>Generate Semua Akun
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            <% } %>
+            <a href="/users/create" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Tambah User
+            </a>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    <% if (success && success.length > 0) { %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i><%= success %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+    
+    <% if (error && error.length > 0) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i><%= error %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+
+    <!-- Filter by Role -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <label class="form-label mb-2"><i class="bi bi-funnel me-2"></i>Filter berdasarkan Role:</label>
+                </div>
+                <div class="col-md-6">
+                    <form method="GET" action="/users" class="d-flex gap-2">
+                        <select class="form-select" name="role" onchange="this.form.submit()">
+                            <option value="" <%= !filterRole ? 'selected' : '' %>>Semua Role</option>
+                            <option value="super_admin" <%= filterRole === 'super_admin' ? 'selected' : '' %>>Tata Usaha (Super Admin)</option>
+                            <option value="admin" <%= filterRole === 'admin' ? 'selected' : '' %>>Admin</option>
+                            <option value="guru" <%= filterRole === 'guru' ? 'selected' : '' %>>Guru</option>
+                            <option value="siswa" <%= filterRole === 'siswa' ? 'selected' : '' %>>Siswa</option>
+                        </select>
+                        <% if (filterRole) { %>
+                            <a href="/users" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
+                        <% } %>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <form method="POST" action="/users/delete-batch" id="deleteForm">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="selectAll" onchange="toggleSelectAll(this)">
+                        <label class="form-check-label" for="selectAll">
+                            <strong>Pilih Semua</strong>
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-danger" 
+                            onclick="return confirmBatchDelete()"
+                            id="deleteSelectedBtn" disabled>
+                        <i class="bi bi-trash me-2"></i>Hapus Terpilih (<span id="selectedCount">0</span>)
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 40px;">
+                                    <input class="form-check-input" type="checkbox" onchange="toggleSelectAll(this)">
+                                </th>
+                                <th>No</th>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th>Nama</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (users && users.length > 0) { %>
+                                <% users.forEach((user, index) => { %>
+                                    <tr>
+                                        <td>
+                                            <input class="form-check-input user-checkbox" type="checkbox" 
+                                                   name="user_ids" 
+                                                   value="<%= user.id %>" 
+                                                   onchange="updateSelectedCount()">
+                                        </td>
+                                        <td><%= index + 1 %></td>
+                                        <td><strong><%= user.username %></strong></td>
+                                        <td>
+                                            <% 
+                                            const roleBadge = {
+                                                'super_admin': 'bg-danger',
+                                                'admin': 'bg-warning text-dark',
+                                                'guru': 'bg-info',
+                                                'siswa': 'bg-success'
+                                            };
+                                            const roleLabel = {
+                                                'super_admin': 'Tata Usaha',
+                                                'admin': 'Admin',
+                                                'guru': 'Guru',
+                                                'siswa': 'Siswa'
+                                            };
+                                            %>
+                                            <span class="badge <%= roleBadge[user.role] || 'bg-secondary' %>">
+                                                <%= roleLabel[user.role] || user.role %>
+                                            </span>
+                                        </td>
+                                        <td><%= user.nama_guru || user.nama_siswa || '-' %></td>
+                                        <td>
+                                            <span class="badge <%= user.is_active ? 'bg-success' : 'bg-secondary' %>">
+                                                <%= user.is_active ? 'Aktif' : 'Nonaktif' %>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="/users/edit/<%= user.id %>" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-pencil"></i> Edit
+                                            </a>
+                                            <form method="POST" action="/users/delete/<%= user.id %>" class="d-inline" 
+                                                  onsubmit="return confirm('⚠️ PERINGATAN: Akun <%= user.username %> akan DIHAPUS PERMANEN dari database!\n\nTindakan ini tidak dapat dibatalkan.\n\nYakin ingin menghapus user ini?')">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                    <i class="bi bi-trash"></i> Hapus
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-4">
+                                        <i class="bi bi-inbox" style="font-size: 3rem; display: block; margin-bottom: 1rem;"></i>
+                                        Belum ada data user
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Select all checkboxes
+function toggleSelectAll(source) {
+    const checkboxes = document.querySelectorAll('.user-checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = source.checked;
+    });
+    updateSelectedCount();
+}
+
+// Update selected count
+function updateSelectedCount() {
+    const checkedBoxes = document.querySelectorAll('.user-checkbox:checked');
+    const count = checkedBoxes.length;
+    document.getElementById('selectedCount').textContent = count;
+    
+    const deleteBtn = document.getElementById('deleteSelectedBtn');
+    if (count > 0) {
+        deleteBtn.disabled = false;
+        deleteBtn.classList.remove('btn-outline-danger');
+        deleteBtn.classList.add('btn-danger');
+    } else {
+        deleteBtn.disabled = true;
+        deleteBtn.classList.remove('btn-danger');
+        deleteBtn.classList.add('btn-outline-danger');
+    }
+}
+
+// Confirm batch delete
+function confirmBatchDelete() {
+    const checkedBoxes = document.querySelectorAll('.user-checkbox:checked');
+    const count = checkedBoxes.length;
+    
+    if (count === 0) {
+        alert('Pilih minimal satu user untuk dihapus');
+        return false;
+    }
+    
+    return confirm(`️ PERINGATAN: ${count} user akan DIHAPUS PERMANEN dari database!\n\nTindakan ini tidak dapat dibatalkan.\n\nYakin ingin menghapus ${count} user terpilih?`);
+}
+</script>

@@ -1,0 +1,102 @@
+<% layout('layout') -%>
+
+<div class="dashboard-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-person-plus me-2 text-primary"></i>Tambah User Baru</h2>
+        <a href="/users" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Kembali
+        </a>
+    </div>
+
+    <% if (error && error.length > 0) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i><%= error %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <form method="POST" action="/users/create">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="username" name="username" 
+                               placeholder="Masukkan username" required>
+                        <small class="text-muted">Username untuk login</small>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" id="password" name="password" 
+                               placeholder="Masukkan password" required>
+                        <small class="text-muted">Password untuk login (minimal 6 karakter)</small>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
+                        <select class="form-select" id="role" name="role" required>
+                            <option value="">Pilih Role</option>
+                            <% if (user && user.role === 'super_admin') { %>
+                                <option value="super_admin">Tata Usaha (Super Admin)</option>
+                                <option value="admin">Admin</option>
+                            <% } %>
+                            <option value="guru">Guru</option>
+                            <option value="siswa">Siswa</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="guru_id" class="form-label">Pilih Guru (untuk role Guru)</label>
+                        <select class="form-select" id="guru_id" name="guru_id">
+                            <option value="">Tidak ada</option>
+                            <% if (teachers && teachers.length > 0) { %>
+                                <% teachers.forEach(teacher => { %>
+                                    <option value="<%= teacher.id %>"><%= teacher.nama_guru %></option>
+                                <% }); %>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="col-md-12 mb-3" id="siswaSelect" style="display: none;">
+                        <label for="siswa_id" class="form-label">Pilih Siswa (untuk role Siswa)</label>
+                        <select class="form-select" id="siswa_id" name="siswa_id">
+                            <option value="">Tidak ada</option>
+                            <% if (students && students.length > 0) { %>
+                                <% students.forEach(student => { %>
+                                    <option value="<%= student.id %>">
+                                        <%= student.nama_siswa %> - <%= student.nama_kelas || 'Belum ada kelas' %>
+                                    </option>
+                                <% }); %>
+                            <% } %>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-2"></i>Simpan User
+                    </button>
+                    <a href="/users" class="btn btn-secondary">
+                        <i class="bi bi-x-circle me-2"></i>Batal
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Show/hide siswa select based on role
+document.getElementById('role').addEventListener('change', function() {
+    const siswaSelect = document.getElementById('siswaSelect');
+    if (this.value === 'siswa') {
+        siswaSelect.style.display = 'block';
+        document.getElementById('siswa_id').required = true;
+    } else {
+        siswaSelect.style.display = 'none';
+        document.getElementById('siswa_id').required = false;
+        document.getElementById('siswa_id').value = '';
+    }
+});
+</script>

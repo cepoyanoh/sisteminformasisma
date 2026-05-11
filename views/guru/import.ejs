@@ -1,0 +1,142 @@
+<% layout('layout') -%>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h3><i class="bi bi-file-earmark-excel text-success me-2"></i>Import Data Guru dari Excel</h3>
+        <p class="text-muted">Upload file Excel (.xlsx atau .xls) untuk mengimport data guru secara massal</p>
+    </div>
+</div>
+
+<!-- Flash Messages -->
+<% if (typeof success !== 'undefined' && success.length > 0) { %>
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i><%= success %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+<% } %>
+
+<% if (typeof warning !== 'undefined' && warning.length > 0) { %>
+  <div class="alert alert-warning alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i><%= warning %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+<% } %>
+
+<% if (typeof error !== 'undefined' && error.length > 0) { %>
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-x-circle-fill me-2"></i><%= error %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+<% } %>
+
+<!-- Tampilkan error detail jika ada -->
+<% if (typeof importErrors !== 'undefined' && importErrors && importErrors.length > 0) { %>
+  <div class="alert alert-warning" role="alert">
+    <h6 class="alert-heading"><i class="bi bi-exclamation-triangle me-2"></i>Detail Error:</h6>
+    <ul class="mb-0">
+      <% importErrors.forEach(err => { %>
+        <li><%= err %></li>
+      <% }) %>
+    </ul>
+  </div>
+<% } %>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-upload me-2"></i>Upload File Excel</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="/guru/import" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="file_excel" class="form-label">Pilih File Excel <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control form-control-lg" id="file_excel" name="file_excel" 
+                               accept=".xlsx,.xls" required>
+                        <small class="text-muted d-block mt-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Format yang didukung: .xlsx, .xls (Maksimal 5MB)
+                        </small>
+                    </div>
+
+                    <div class="alert alert-info" role="alert">
+                        <h6 class="alert-heading"><i class="bi bi-lightbulb me-2"></i>Petunjuk Pengisian:</h6>
+                        <ol class="mb-0 small">
+                            <li>Download template Excel terlebih dahulu</li>
+                            <li>Isi data sesuai dengan kolom yang tersedia</li>
+                            <li>Pastikan <strong>NIP</strong>, <strong>Nama Guru</strong>, dan <strong>Jenis Kelamin</strong> terisi</li>
+                            <li>Jenis Kelamin: bisa menggunakan <strong>"L"</strong>, <strong>"Laki-laki"</strong> atau <strong>"P"</strong>, <strong>"Perempuan"</strong> (sistem akan otomatis mengkonversi)</li>
+                            <li>Tanggal Lahir format: YYYY-MM-DD (contoh: 1985-01-01)</li>
+                            <li>Simpan file dan upload kembali ke sistem</li>
+                        </ol>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="/guru/download-template" class="btn btn-outline-primary me-md-2">
+                            <i class="bi bi-download me-2"></i>Download Template
+                        </a>
+                        <a href="/guru" class="btn btn-secondary me-md-2">
+                            <i class="bi bi-x-circle me-2"></i>Batal
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-cloud-upload me-2"></i>Import Data
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0"><i class="bi bi-table me-2"></i>Format Kolom Excel</h6>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Kolom</th>
+                            <th>Keterangan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>NIP</strong></td>
+                            <td>Wajib, unik</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Nama Guru</strong></td>
+                            <td>Wajib</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Jenis Kelamin</strong></td>
+                            <td>Wajib (L/P/Laki-laki/Perempuan)</td>
+                        </tr>
+                        <tr>
+                            <td>Tanggal Lahir</td>
+                            <td>Opsional</td>
+                        </tr>
+                        <tr>
+                            <td>Alamat</td>
+                            <td>Opsional</td>
+                        </tr>
+                        <tr>
+                            <td>Nomor Telepon</td>
+                            <td>Opsional</td>
+                        </tr>
+                        <tr>
+                            <td>Email</td>
+                            <td>Opsional</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="alert alert-warning small mb-0">
+                    <i class="bi bi-exclamation-triangle me-1"></i>
+                    <strong>Catatan:</strong> NIP yang sudah ada di database akan dilewati (tidak diupdate).
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

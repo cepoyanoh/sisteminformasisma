@@ -1,0 +1,521 @@
+<% layout('layout') -%>
+
+<div class="dashboard-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-pencil-square me-2 text-primary"></i><%= heading %></h2>
+        <div class="d-flex gap-2">
+            <a href="/" class="btn btn-outline-secondary">
+                <i class="bi bi-house-door me-2"></i>Dashboard
+            </a>
+            <a href="/absensi" class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Kembali
+            </a>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    <% if (success && success.length > 0) { %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i><%= success %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+    
+    <% if (error && error.length > 0) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i><%= error %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+
+    <form method="POST" action="/absensi" id="formAbsensi">
+        <input type="hidden" name="tanggal" value="<%= tanggal %>">
+        <input type="hidden" name="kelas_id" value="<%= kelas ? kelas.id : '' %>">
+        <input type="hidden" name="absensi_data" id="absensiData">
+
+        <!-- Info Card: Tanggal, Kelas, Mapel, Guru -->
+        <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong><i class="bi bi-calendar me-2"></i>Tanggal:</strong> 
+                        <%= new Date(tanggal).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %>
+                    </div>
+                    <div class="col-md-3">
+                        <strong><i class="bi bi-building me-2"></i>Kelas:</strong> 
+                        <%= kelas ? kelas.nama_kelas : '-' %>
+                    </div>
+                    <div class="col-md-3">
+                        <strong><i class="bi bi-book me-2"></i>Mata Pelajaran:</strong> 
+                        <select class="form-select form-select-sm" id="mapel_id" name="mapel_id" required>
+                            <option value="">Pilih Mapel</option>
+                            <% if (mapelList && mapelList.length > 0) { %>
+                                <% mapelList.forEach(mapel => { %>
+                                    <option value="<%= mapel.id %>">
+                                        <%= mapel.nama_mapel %>
+                                    </option>
+                                <% }); %>
+                            <% } else { %>
+                                <option value="" disabled>Tidak ada mapel</option>
+                            <% } %>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <strong><i class="bi bi-person me-2"></i>Guru Pengajar:</strong> 
+                        <select class="form-select form-select-sm" id="guru_id" name="guru_id" required>
+                            <option value="">Pilih Guru</option>
+                            <% if (guruList && guruList.length > 0) { %>
+                                <% guruList.forEach(guru => { %>
+                                    <option value="<%= guru.id %>">
+                                        <%= guru.nama_guru %>
+                                    </option>
+                                <% }); %>
+                            <% } else { %>
+                                <option value="" disabled>Tidak ada guru</option>
+                            <% } %>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabel Absensi Siswa -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0"><i class="bi bi-people me-2"></i>Daftar Kehadiran Siswa</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th width="5%">No</th>
+                                <th>Nama Siswa</th>
+                                <th width="35%">Status</th>
+                                <th>Keterangan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (siswaList && siswaList.length > 0) { %>
+                                <% siswaList.forEach((siswa, index) => { %>
+                                    <tr>
+                                        <td class="text-center"><%= index + 1 %></td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-placeholder bg-primary text-white rounded-circle d-flex justify-content-center align-items-center me-2" style="width: 32px; height: 32px; font-size: 14px;">
+                                                    <%= siswa.nama_siswa ? siswa.nama_siswa.charAt(0).toUpperCase() : 'S' %>
+                                                </div>
+                                                <%= siswa.nama_siswa %>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="status-buttons" data-siswa-id="<%= siswa.id %>">
+                                                <button type="button" class="btn-status btn-hadir" data-status="hadir" onclick="setStatus(this)">
+                                                    <i class="bi bi-check-circle"></i> Hadir
+                                                </button>
+                                                <button type="button" class="btn-status btn-sakit" data-status="sakit" onclick="setStatus(this)">
+                                                    <i class="bi bi-thermometer-half"></i> Sakit
+                                                </button>
+                                                <button type="button" class="btn-status btn-izin" data-status="izin" onclick="setStatus(this)">
+                                                    <i class="bi bi-envelope"></i> Izin
+                                                </button>
+                                                <button type="button" class="btn-status btn-tidak-hadir" data-status="tidak_hadir" onclick="setStatus(this)">
+                                                    <i class="bi bi-x-circle"></i> Tidak Hadir
+                                                </button>
+                                                <input type="hidden" name="status_<%= siswa.id %>" value="hadir" class="status-value">
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control form-control-sm" 
+                                                   placeholder="Keterangan (opsional)" 
+                                                   data-siswa-id="<%= siswa.id %>"
+                                                   oninput="updateKeterangan(this)">
+                                        </td>
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="4" class="text-center py-4 text-muted">
+                                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                        Tidak ada data siswa di kelas ini.
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Tombol Aksi -->
+                <div class="mt-4 d-flex gap-2 flex-wrap">
+                    <button type="button" class="btn btn-success" onclick="setAllStatus('hadir')">
+                        <i class="bi bi-check-all me-2"></i>Semua Hadir
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-save me-2"></i>Simpan Absensi
+                    </button>
+                    <a href="/absensi" class="btn btn-secondary">
+                        <i class="bi bi-x-circle me-2"></i>Batal
+                    </a>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+/* Style untuk tombol status */
+.status-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-status {
+    padding: 6px 12px;
+    border: 2px solid #dee2e6;
+    background-color: #fff;
+    color: #6c757d;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-status:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.btn-status.active {
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Warna untuk setiap status */
+.btn-hadir.active {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.btn-sakit.active {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #000;
+}
+
+.btn-izin.active {
+    background-color: #0dcaf0;
+    border-color: #0dcaf0;
+}
+
+.btn-tidak-hadir.active {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+/* Responsive untuk mobile */
+@media (max-width: 768px) {
+    .status-buttons {
+        gap: 4px;
+    }
+    
+    .btn-status {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+    
+    .btn-status i {
+        display: none;
+    }
+}
+</style>
+
+<script>
+// TEST: Verify JavaScript is working
+console.log('\n✅✅✅ ATTENDANCE FORM JAVASCRIPT LOADED ✅✅✅\n');
+console.log('🧪 Running quick test...');
+
+// Test if setStatus function exists
+if (typeof setStatus === 'function') {
+    console.log('✅ setStatus() function is defined');
+} else {
+    console.error('❌ setStatus() function NOT FOUND!');
+}
+
+// Test DOM structure
+setTimeout(() => {
+    const statusButtons = document.querySelectorAll('.status-buttons');
+    const hiddenInputs = document.querySelectorAll('.status-value');
+    console.log(`📊 DOM Check: Found ${statusButtons.length} status button containers`);
+    console.log(`📊 DOM Check: Found ${hiddenInputs.length} hidden inputs`);
+    
+    if (statusButtons.length !== hiddenInputs.length) {
+        console.error('❌ MISMATCH: Number of containers != number of hidden inputs!');
+    } else {
+        console.log('✅ DOM structure is correct');
+    }
+    
+    // Test first hidden input
+    if (hiddenInputs.length > 0) {
+        const firstInput = hiddenInputs[0];
+        console.log(`🧪 Test: First hidden input value = "${firstInput.value}"`);
+        console.log(`🧪 Test: First hidden input name = "${firstInput.name}"`);
+        console.log(`🧪 Test: Parent container has siswa-id = "${firstInput.parentElement.dataset.siswaId}"`);
+    }
+}, 500);
+
+// Data absensi yang akan dikirim
+let absensiData = [];
+
+// Initialize data dari existing absensi
+document.addEventListener('DOMContentLoaded', function() {
+    const rows = document.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        const statusButtons = row.querySelectorAll('.btn-status');
+        const keteranganInput = row.querySelector('input[type="text"]');
+        const hiddenInput = row.querySelector('.status-value');
+        
+        if (statusButtons.length > 0) {
+            const siswaId = row.querySelector('.status-buttons').dataset.siswaId;
+            
+            // Set default status ke Hadir (button pertama)
+            const firstButton = statusButtons[0];
+            firstButton.classList.add('active');
+            
+            absensiData.push({
+                siswa_id: siswaId,
+                status_kehadiran: 'hadir',
+                keterangan: keteranganInput ? keteranganInput.value : ''
+            });
+        }
+    });
+});
+
+// Set status ketika tombol diklik
+function setStatus(button) {
+    const container = button.parentElement;
+    const siswaId = container.dataset.siswaId;
+    const status = button.dataset.status;
+    
+    console.log(`\n🔵 ===== SET STATUS TRIGGERED =====`);
+    console.log(`   Student ID: ${siswaId}`);
+    console.log(`   Status clicked: ${status}`);
+    
+    // Remove active class from all buttons in this container
+    const allButtons = container.querySelectorAll('.btn-status');
+    allButtons.forEach(btn => btn.classList.remove('active'));
+    
+    // Add active class to clicked button
+    button.classList.add('active');
+    
+    // Update hidden input value
+    const hiddenInput = container.querySelector('.status-value');
+    if (hiddenInput) {
+        const oldValue = hiddenInput.value;
+        hiddenInput.value = status;
+        console.log(`   📝 Hidden input VALUE BEFORE: ${oldValue}`);
+        console.log(`   📝 Hidden input VALUE AFTER: ${hiddenInput.value}`);
+        
+        // DEBUG: Verify the change
+        setTimeout(() => {
+            const verifyValue = container.querySelector('.status-value').value;
+            console.log(`   ✅ Verification (100ms later): ${verifyValue}`);
+            if (verifyValue !== status) {
+                console.error(`   ❌ CRITICAL: Hidden input was overwritten! Expected: ${status}, Got: ${verifyValue}`);
+            }
+        }, 100);
+        
+        console.log(`   ✅ Hidden input updated for student ${siswaId}: ${status}`);
+    } else {
+        console.error(`   ❌ Hidden input not found for student ${siswaId}!`);
+        console.error(`   🔍 Container HTML:`, container.innerHTML);
+    }
+    
+    // Update data array (for real-time tracking)
+    const item = absensiData.find(d => d.siswa_id === siswaId);
+    if (item) {
+        item.status_kehadiran = status;
+        console.log(`   📊 Data array updated for student ${siswaId}`);
+    }
+    
+    console.log(`   ✅ Student ${siswaId} status changed to: ${status}`);
+    console.log(`🔵 ===== SET STATUS COMPLETE =====\n`);
+}
+
+// Update keterangan ketika input berubah
+function updateKeterangan(inputElement) {
+    const siswaId = inputElement.dataset.siswaId;
+    const item = absensiData.find(d => d.siswa_id === siswaId);
+    if (item) {
+        item.keterangan = inputElement.value;
+    }
+}
+
+// Set semua status ke hadir
+function setAllStatus(status) {
+    const allContainers = document.querySelectorAll('.status-buttons');
+    allContainers.forEach(container => {
+        const buttons = container.querySelectorAll('.btn-status');
+        buttons.forEach(btn => {
+            if (btn.dataset.status === status) {
+                btn.click(); // Trigger click to update properly
+            }
+        });
+    });
+}
+
+// Prepare data sebelum submit
+document.getElementById('formAbsensi').addEventListener('submit', function(e) {
+    console.log('\n🚀 ===== FORM SUBMIT START =====');
+    
+    // VALIDATION: Check if Mapel and Guru are selected
+    const mapelSelect = document.getElementById('mapel_id');
+    const guruSelect = document.getElementById('guru_id');
+    
+    if (!mapelSelect || !mapelSelect.value) {
+        e.preventDefault();
+        alert('⚠️ HARAP PILIH MATA PELAJARAN terlebih dahulu!');
+        console.error('❌ Validation failed: Mapel not selected');
+        return;
+    }
+    
+    if (!guruSelect || !guruSelect.value) {
+        e.preventDefault();
+        alert('⚠️ HARAP PILIH GURU PENGAJAR terlebih dahulu!');
+        console.error('❌ Validation failed: Guru not selected');
+        return;
+    }
+    
+    console.log('✅ Mapel ID:', mapelSelect.value);
+    console.log('✅ Guru ID:', guruSelect.value);
+    
+    // Update semua data terbaru sebelum submit
+    const rows = document.querySelectorAll('tbody tr');
+    absensiData = []; // Reset array
+    
+    console.log(`📋 Processing ${rows.length} rows...`);
+    
+    rows.forEach((row, index) => {
+        const statusButtons = row.querySelector('.status-buttons');
+        const keteranganInput = row.querySelector('input[type="text"]');
+        const hiddenInput = row.querySelector('.status-value');
+        
+        if (statusButtons) {
+            const siswaId = statusButtons.dataset.siswaId;
+            const statusValue = hiddenInput ? hiddenInput.value : 'hadir';
+            
+            absensiData.push({
+                siswa_id: siswaId,
+                status_kehadiran: statusValue,
+                keterangan: keteranganInput ? keteranganInput.value : ''
+            });
+            
+            // Log tidak_hadir status specifically
+            if (statusValue === 'tidak_hadir') {
+                const studentName = row.querySelector('.d-flex')?.textContent?.trim() || 'Unknown';
+                console.log(`   🔴 Row ${index + 1}: Student ${siswaId} (${studentName})`);
+                console.log(`      Hidden input value: ${hiddenInput ? hiddenInput.value : 'NOT FOUND'}`);
+                console.log(`      Status sent to server: ${statusValue}`);
+            }
+        }
+    });
+    
+    // DEBUG: Tampilkan data yang akan dikirim
+    console.log('\n📤 Data yang akan dikirim:');
+    console.log(JSON.stringify(absensiData, null, 2));
+    
+    // Verify tidak_hadir data is in the payload
+    const tidakHadirData = absensiData.filter(d => d.status_kehadiran === 'tidak_hadir');
+    console.log(`\n🔍 VERIFICATION: Found ${tidakHadirData.length} tidak_hadir record(s) in payload`);
+    if (tidakHadirData.length > 0) {
+        console.log('   Tidak Hadir students:');
+        tidakHadirData.forEach(d => console.log(`      - Student ID: ${d.siswa_id}, Status: ${d.status_kehadiran}`));
+    } else {
+        console.log('   ️  WARNING: No tidak_hadir data found in payload!');
+        console.log('   🔍 Checking hidden inputs...');
+        document.querySelectorAll('.status-value').forEach(input => {
+            console.log(`      Student ${input.name}: value="${input.value}"`);
+        });
+    }
+    
+    // Hitung status breakdown
+    const statusCounts = {
+        hadir: absensiData.filter(d => d.status_kehadiran === 'hadir').length,
+        sakit: absensiData.filter(d => d.status_kehadiran === 'sakit').length,
+        izin: absensiData.filter(d => d.status_kehadiran === 'izin').length,
+        tidak_hadir: absensiData.filter(d => d.status_kehadiran === 'tidak_hadir').length
+    };
+    
+    console.log('\n📊 Status Breakdown:');
+    console.log(`   ✅ Hadir:  ${statusCounts.hadir}`);
+    console.log(`   🤒 Sakit:  ${statusCounts.sakit}`);
+    console.log(`   📧 Izin:   ${statusCounts.izin}`);
+    console.log(`   ❌ Tidak Hadir:  ${statusCounts.tidak_hadir}`);
+    console.log(`    Total:  ${absensiData.length}\n`);
+    
+    // Tampilkan alert untuk konfirmasi jika ada tidak_hadir
+    if (statusCounts.tidak_hadir > 0) {
+        const confirmSubmit = confirm(`Anda akan menyimpan absensi dengan ${statusCounts.tidak_hadir} siswa status TIDAK HADIR. Lanjutkan?`);
+        if (!confirmSubmit) {
+            console.log('❌ Submit cancelled by user');
+            e.preventDefault();
+            return;
+        }
+        console.log('✅ User confirmed tidak_hadir submission');
+    } else {
+        console.log('ℹ️  No tidak_hadir students, no confirmation needed');
+    }
+    
+    // Final verification before setting form value
+    console.log('📦 Setting absensiData field value...');
+    const absensiDataField = document.getElementById('absensiData');
+    absensiDataField.value = JSON.stringify(absensiData);
+    console.log('✅ Form data set, length:', absensiDataField.value.length);
+    console.log('🚀 ===== FORM SUBMIT END =====\n');
+});
+
+// DEBUG: Check all hidden inputs
+function debugHiddenInputs() {
+    console.log('\n ===== DEBUG HIDDEN INPUTS =====');
+    const hiddenInputs = document.querySelectorAll('.status-value');
+    const alphaStudents = [];
+    const hadirStudents = [];
+    
+    hiddenInputs.forEach(input => {
+        const container = input.closest('.status-buttons');
+        const siswaId = container.dataset.siswaId;
+        const row = container.closest('tr');
+        const studentName = row.querySelector('.d-flex')?.textContent?.trim() || 'Unknown';
+        
+        console.log(`   Student ${siswaId} (${studentName}): value="${input.value}"`);
+        
+        if (input.value === 'tidak_hadir') {
+            alphaStudents.push(`${studentName} (ID: ${siswaId})`);
+        } else if (input.value === 'hadir') {
+            hadirStudents.push(studentName);
+        }
+    });
+    
+    console.log(`\n📊 Summary:`);
+    console.log(`   Tidak Hadir: ${alphaStudents.length} students`);
+    console.log(`   Hadir: ${hadirStudents.length} students`);
+    
+    if (alphaStudents.length > 0) {
+        console.log('\n Tidak Hadir Students:');
+        alphaStudents.forEach(name => console.log(`      - ${name}`));
+        alert(`✅ Found ${alphaStudents.length} Tidak Hadir students:\n${alphaStudents.slice(0, 5).join('\n')}${alphaStudents.length > 5 ? '\n...' : ''}`);
+    } else {
+        console.log('\n⚠️  WARNING: No Tidak Hadir students found!');
+        console.log('   This means hidden inputs were NOT updated when you clicked Tidak Hadir buttons.');
+        alert('⚠️ No Tidak Hadir students found!\n\nHidden inputs still have "hadir" value.\n\nCheck console for detailed debugging info.');
+    }
+    
+    console.log('🐛 ===== DEBUG COMPLETE =====\n');
+}
+
+</script>

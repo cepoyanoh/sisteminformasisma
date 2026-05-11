@@ -1,0 +1,253 @@
+<% layout('layout') -%>
+
+<div class="dashboard-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-file-earmark-spreadsheet me-2 text-success"></i>Import Data Siswa dari Excel</h2>
+        <a href="/siswa" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Kembali
+        </a>
+    </div>
+
+    <!-- Alert Messages -->
+    <% if (success && success.length > 0) { %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i><%= success[0] %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+    
+    <% if (error && error.length > 0) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i><%= error[0] %>
+            <% if (errors && errors.length > 0) { %>
+                <ul class="mb-0 mt-2">
+                    <% errors.forEach(err => { %>
+                        <li><%= err %></li>
+                    <% }); %>
+                </ul>
+            <% } %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+    
+    <% if (warning && warning.length > 0) { %>
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle-fill me-2"></i><%= warning[0] %>
+            <% if (errors && errors.length > 0) { %>
+                <ul class="mb-0 mt-2">
+                    <% errors.slice(0, 5).forEach(err => { %>
+                        <li><%= err %></li>
+                    <% }); %>
+                    <% if (errors.length > 5) { %>
+                        <li>... dan <%= errors.length - 5 %> error lainnya</li>
+                    <% } %>
+                </ul>
+            <% } %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-success text-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-upload me-2"></i>Upload File Excel</h5>
+                </div>
+                <div class="card-body">
+                    <form action="/siswa/import" method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Pilih File Excel</label>
+                            <input type="file" class="form-control" id="file" name="file" accept=".xlsx,.xls" required>
+                            <div class="form-text">Format yang didukung: .xlsx, .xls (Maks. 5MB)</div>
+                        </div>
+
+                        <div class="alert alert-info" role="alert">
+                            <h6 class="alert-heading"><i class="bi bi-info-circle me-2"></i>Panduan Import:</h6>
+                            <ul class="mb-0">
+                                <li>Pastikan file Excel memiliki header kolom yang sesuai</li>
+                                <li>Kolom <strong>Nama</strong> wajib diisi</li>
+                                <li><strong class="text-danger">⚠️ Nama siswa tidak boleh duplikat dalam file</strong></li>
+                                <li><strong class="text-danger">⚠️ Nama siswa tidak boleh sama dengan data yang sudah ada di database</strong></li>
+                                <li>Kolom <strong>Kelas</strong> harus sesuai dengan nama kelas yang ada di sistem</li>
+                                <li>Format tanggal: YYYY-MM-DD (contoh: 2005-01-15)</li>
+                                <li>Jenis Kelamin: L (Laki-laki) atau P (Perempuan)</li>
+                                <li>Status: aktif, non-aktif, atau lulus</li>
+                            </ul>
+                        </div>
+
+                        <div class="alert alert-warning" role="alert">
+                            <h6 class="alert-heading"><i class="bi bi-exclamation-triangle me-2"></i>Validasi Duplikasi:</h6>
+                            <ul class="mb-0">
+                                <li>Sistem akan mengecek <strong>duplikasi dalam file</strong> Excel</li>
+                                <li>Sistem akan mengecek <strong>duplikasi dengan database</strong> existing</li>
+                                <li>Jika ditemukan duplikasi, <strong>import akan dibatalkan</strong></li>
+                                <li>Pesan error akan ditampilkan untuk memperjelas baris mana yang bermasalah</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-cloud-upload me-2"></i>Import Data
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0"><i class="bi bi-download me-2"></i>Download Template</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-light border mb-3" role="alert">
+                        <i class="bi bi-lightbulb me-2 text-primary"></i>
+                        Gunakan template ini untuk memastikan format data sesuai dengan sistem.
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="mb-2">Format Kolom Excel:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Nama Kolom</th>
+                                        <th>Keterangan</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td><code>NIS</code></td>
+                                        <td>Nomor Induk Siswa</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td><code>NISN</code></td>
+                                        <td>Nomor Induk Siswa Nasional</td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td><code>Nama</code></td>
+                                        <td><span class="text-danger">*Wajib diisi</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>4</td>
+                                        <td><code>Jenis Kelamin</code></td>
+                                        <td>L atau P</td>
+                                    </tr>
+                                    <tr>
+                                        <td>5</td>
+                                        <td><code>Tempat Lahir</code></td>
+                                        <td>Opsional</td>
+                                    </tr>
+                                    <tr>
+                                        <td>6</td>
+                                        <td><code>Tanggal Lahir</code></td>
+                                        <td>Format: YYYY-MM-DD</td>
+                                    </tr>
+                                    <tr>
+                                        <td>7</td>
+                                        <td><code>Alamat</code></td>
+                                        <td>Opsional</td>
+                                    </tr>
+                                    <tr>
+                                        <td>8</td>
+                                        <td><code>No Telepon</code></td>
+                                        <td>Opsional</td>
+                                    </tr>
+                                    <tr>
+                                        <td>9</td>
+                                        <td><code>Kelas</code></td>
+                                        <td>Harus sesuai data kelas</td>
+                                    </tr>
+                                    <tr>
+                                        <td>10</td>
+                                        <td><code>Tahun Ajaran</code></td>
+                                        <td>Contoh: 2025/2026</td>
+                                    </tr>
+                                    <tr>
+                                        <td>11</td>
+                                        <td><code>Status</code></td>
+                                        <td>aktif/non-aktif/lulus</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a href="/siswa/template" class="btn btn-primary btn-lg">
+                            <i class="bi bi-file-earmark-arrow-down me-2"></i>Download Template Excel
+                        </a>
+                    </div>
+
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Template berisi 2 baris data contoh untuk panduan pengisian
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Example Data Preview -->
+    <div class="card border-0 shadow-sm mt-4">
+        <div class="card-header bg-info text-white py-3">
+            <h5 class="mb-0"><i class="bi bi-table me-2"></i>Contoh Data Excel</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>NIS</th>
+                            <th>NISN</th>
+                            <th>Nama</th>
+                            <th>Jenis Kelamin</th>
+                            <th>Tempat Lahir</th>
+                            <th>Tanggal Lahir</th>
+                            <th>Alamat</th>
+                            <th>No Telepon</th>
+                            <th>Kelas</th>
+                            <th>Tahun Ajaran</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>12345</td>
+                            <td>1234567890</td>
+                            <td>Ahmad Fauzi</td>
+                            <td>L</td>
+                            <td>Pontianak</td>
+                            <td>2005-01-15</td>
+                            <td>Jl. Merdeka No. 1</td>
+                            <td>081234567890</td>
+                            <td>X IPA 1</td>
+                            <td>2025/2026</td>
+                            <td>aktif</td>
+                        </tr>
+                        <tr>
+                            <td>12346</td>
+                            <td>1234567891</td>
+                            <td>Siti Nurhaliza</td>
+                            <td>P</td>
+                            <td>Pontianak</td>
+                            <td>2005-02-20</td>
+                            <td>Jl. Sudirman No. 2</td>
+                            <td>081234567891</td>
+                            <td>X IPA 1</td>
+                            <td>2025/2026</td>
+                            <td>aktif</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

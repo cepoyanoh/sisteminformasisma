@@ -1,0 +1,221 @@
+<% layout('layout') -%>
+
+<!-- Welcome Banner -->
+<div class="welcome-banner mb-4 p-4 rounded" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+    <div class="d-flex align-items-center">
+        <div class="rounded-circle bg-white bg-opacity-25 p-3 me-3">
+            <i class="bi bi-house-door-fill text-white" style="font-size: 2.5rem;"></i>
+        </div>
+        <div>
+            <small class="text-white text-opacity-75 d-block mb-1" style="font-size: 1rem;">Selamat Datang,</small>
+            <h3 class="mb-2 fw-bold"><%= user.nama %></h3>
+            <span class="badge bg-white bg-opacity-25 text-white" style="font-size: 0.9rem;">
+                <% 
+                const roleLabels = {
+                    'super_admin': 'Tata Usaha',
+                    'admin': 'Admin',
+                    'guru': 'Guru',
+                    'siswa': 'Siswa'
+                };
+                %>
+                <%= roleLabels[user.role] || user.role %>
+            </span>
+        </div>
+    </div>
+</div>
+
+<% if (user.role === 'super_admin' || user.role === 'admin') { %>
+    <!-- SUPER ADMIN & ADMIN DASHBOARD -->
+    <!-- Statistics Cards -->
+    <div class="row g-3 mb-4">
+        <!-- Data Guru -->
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card bg-info bg-opacity-10 p-4 rounded text-center h-100" style="cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'" onclick="window.location.href='/guru'">
+                <i class="bi bi-people text-info d-block mb-3" style="font-size: 2.5rem;"></i>
+                <h6 class="text-muted mb-2">Guru</h6>
+                <h2 class="text-info mb-0 fw-bold"><%= stats.totalGuru %></h2>
+            </div>
+        </div>
+        
+        <!-- Mata Pelajaran -->
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card bg-success bg-opacity-10 p-4 rounded text-center h-100" style="cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'" onclick="window.location.href='/mapel'">
+                <i class="bi bi-book text-success d-block mb-3" style="font-size: 2.5rem;"></i>
+                <h6 class="text-muted mb-2">Mapel</h6>
+                <h2 class="text-success mb-0 fw-bold"><%= stats.totalMapel %></h2>
+            </div>
+        </div>
+        
+        <!-- Data Kelas -->
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card bg-primary bg-opacity-10 p-4 rounded text-center h-100" style="cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'" onclick="window.location.href='/kelas'">
+                <i class="bi bi-journal text-primary d-block mb-3" style="font-size: 2.5rem;"></i>
+                <h6 class="text-muted mb-2">Kelas</h6>
+                <h2 class="text-primary mb-0 fw-bold"><%= stats.totalKelas %></h2>
+            </div>
+        </div>
+        
+        <!-- Data Siswa -->
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card bg-danger bg-opacity-10 p-4 rounded text-center h-100" style="cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'" onclick="window.location.href='/siswa'">
+                <i class="bi bi-person-badge text-danger d-block mb-3" style="font-size: 2.5rem;"></i>
+                <h6 class="text-muted mb-2">Siswa</h6>
+                <h2 class="text-danger mb-0 fw-bold"><%= stats.totalSiswa || 0 %></h2>
+            </div>
+        </div>
+        
+        <!-- Manajemen User (Super Admin & Admin only) -->
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card bg-dark bg-opacity-10 p-4 rounded text-center h-100" style="cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'" onclick="window.location.href='/users'">
+                <i class="bi bi-shield-lock text-dark d-block mb-3" style="font-size: 2.5rem;"></i>
+                <h6 class="text-muted mb-2">Manajemen User</h6>
+                <h2 class="text-dark mb-0 fw-bold"><i class="bi bi-gear"></i></h2>
+            </div>
+        </div>
+        
+        <!-- Absensi Siswa -->
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card bg-secondary bg-opacity-10 p-4 rounded text-center h-100" style="cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'" onclick="window.location.href='/absensi'">
+                <i class="bi bi-calendar-check text-secondary d-block mb-3" style="font-size: 2.5rem;"></i>
+                <h6 class="text-muted mb-2">Absensi</h6>
+                <h2 class="text-secondary mb-0 fw-bold"><%= stats.totalAbsensi || 0 %></h2>
+            </div>
+        </div>
+        
+        <!-- Jurnal Guru -->
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card bg-warning bg-opacity-10 p-4 rounded text-center h-100" style="cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'" onclick="window.location.href='/jurnal'">
+                <i class="bi bi-journal-bookmark text-warning d-block mb-3" style="font-size: 2.5rem;"></i>
+                <h6 class="text-muted mb-2">Jurnal</h6>
+                <h2 class="text-warning mb-0 fw-bold"><%= stats.totalJurnal %></h2>
+            </div>
+        </div>
+        
+        <!-- Input Nilai -->
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card bg-danger bg-opacity-10 p-4 rounded text-center h-100" style="cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'" onclick="window.location.href='/nilai'">
+                <i class="bi bi-clipboard-data text-danger d-block mb-3" style="font-size: 2.5rem;"></i>
+                <h6 class="text-muted mb-2">Nilai</h6>
+                <h2 class="text-danger mb-0 fw-bold"><%= stats.totalNilai %></h2>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content Section for Admin -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2 text-primary"></i>Selamat Datang di Sistem Informasi Akademik</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-muted">
+                        Sistem Informasi Akademik SMA Negeri 12 Pontianak adalah platform digital 
+                        yang dirancang untuk membantu pengelolaan data sekolah secara efektif dan efisien.
+                    </p>
+                    <p class="card-text text-muted">
+                        Sistem ini mencakup pengelolaan data guru, siswa, kelas, mata pelajaran, 
+                        absensi, jurnal guru, dan nilai siswa sesuai dengan kurikulum yang berlaku.
+                    </p>
+                    
+                    <div class="alert alert-light border mt-3" role="alert">
+                        <h6 class="alert-heading"><i class="bi bi-lightbulb me-2"></i>Informasi</h6>
+                        <p class="mb-0 small">Gunakan menu di atas untuk mengakses berbagai fitur sistem. Sebagai <%= roleLabels[user.role] %>, Anda memiliki akses penuh ke semua fitur sistem.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<% } else if (user.role === 'guru') { %>
+    <!-- GURU DASHBOARD -->
+    <div class="row g-3 mb-4">
+        <!-- Absensi Siswa -->
+        <div class="col-md-4">
+            <div class="stat-card bg-secondary bg-opacity-10 p-4 rounded text-center h-100" style="cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'" onclick="window.location.href='/absensi'">
+                <i class="bi bi-calendar-check text-secondary d-block mb-3" style="font-size: 3rem;"></i>
+                <h6 class="text-muted mb-2">Absensi Siswa</h6>
+                <h2 class="text-secondary mb-0 fw-bold"><%= stats.totalAbsensi || 0 %></h2>
+                <small class="text-muted">Kelola kehadiran siswa</small>
+            </div>
+        </div>
+        
+        <!-- Jurnal Guru -->
+        <div class="col-md-4">
+            <div class="stat-card bg-warning bg-opacity-10 p-4 rounded text-center h-100" style="cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'" onclick="window.location.href='/jurnal'">
+                <i class="bi bi-journal-bookmark text-warning d-block mb-3" style="font-size: 3rem;"></i>
+                <h6 class="text-muted mb-2">Jurnal Guru</h6>
+                <h2 class="text-warning mb-0 fw-bold"><%= stats.totalJurnal %></h2>
+                <small class="text-muted">Catatan kegiatan pembelajaran</small>
+            </div>
+        </div>
+        
+        <!-- Input Nilai -->
+        <div class="col-md-4">
+            <div class="stat-card bg-danger bg-opacity-10 p-4 rounded text-center h-100" style="cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'" onclick="window.location.href='/nilai'">
+                <i class="bi bi-clipboard-data text-danger d-block mb-3" style="font-size: 3rem;"></i>
+                <h6 class="text-muted mb-2">Nilai Siswa</h6>
+                <h2 class="text-danger mb-0 fw-bold"><%= stats.totalNilai %></h2>
+                <small class="text-muted">Input dan kelola nilai</small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Guru Info -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2 text-primary"></i>Selamat Datang, Bapak/Ibu Guru</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-muted">
+                        Sebagai guru, Anda dapat mengelola absensi siswa, mencatat jurnal kegiatan pembelajaran, 
+                        dan menginput nilai siswa. Gunakan menu di atas untuk mengakses fitur yang tersedia.
+                    </p>
+                    
+                    <div class="alert alert-info mt-3" role="alert">
+                        <h6 class="alert-heading"><i class="bi bi-info-circle me-2"></i>Informasi</h6>
+                        <p class="mb-0 small">Hubungi Tata Usaha jika Anda memerlukan bantuan atau memiliki pertanyaan tentang penggunaan sistem.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<% } else if (user.role === 'siswa') { %>
+    <!-- SISWA DASHBOARD -->
+    <div class="row g-3 mb-4">
+        <!-- Nilai Siswa (Only menu for siswa) -->
+        <div class="col-md-12">
+            <div class="stat-card bg-danger bg-opacity-10 p-5 rounded text-center h-100" style="cursor: pointer; transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'" onclick="window.location.href='/nilai'">
+                <i class="bi bi-clipboard-data text-danger d-block mb-3" style="font-size: 4rem;"></i>
+                <h4 class="text-danger mb-2">Lihat Nilai Anda</h4>
+                <h2 class="text-danger mb-0 fw-bold"><%= stats.totalNilai %> Nilai Tersedia</h2>
+                <small class="text-muted mt-2 d-block">Klik untuk melihat semua nilai Anda</small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Siswa Info -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom py-3">
+                    <h5 class="mb-0"><i class="bi bi-info-circle me-2 text-primary"></i>Selamat Datang, <%= user.nama %></h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-muted">
+                        Sebagai siswa, Anda dapat melihat nilai-nilai Anda melalui menu di atas. 
+                        Nilai yang ditampilkan adalah nilai Anda sendiri.
+                    </p>
+                    
+                    <div class="alert alert-light border mt-3" role="alert">
+                        <h6 class="alert-heading"><i class="bi bi-lightbulb me-2"></i>Informasi</h6>
+                        <p class="mb-0 small">Jika Anda memiliki pertanyaan tentang nilai, silakan hubungi guru mata pelajaran atau wali kelas Anda.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<% } %>

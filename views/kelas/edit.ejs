@@ -1,0 +1,50 @@
+<% layout('layout') -%>
+
+<% block('content') %>
+<h3>Edit Kelas</h3>
+
+<form method="POST" action="/kelas/edit/<%= kelas.id %>">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="nama_kelas" class="form-label">Nama Kelas</label>
+                <input type="text" class="form-control" id="nama_kelas" name="nama_kelas" 
+                       value="<%= kelas.nama_kelas %>" placeholder="Contoh: XII IPA 1" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="wali_kelas" class="form-label">Wali Kelas</label>
+                <select class="form-select" id="wali_kelas" name="wali_kelas" required>
+                    <option value="" disabled <%= !kelas.wali_kelas ? 'selected' : '' %>>-- Pilih Wali Kelas --</option>
+                    <option value="" <%= kelas.wali_kelas === '' ? 'selected' : '' %>>Tidak Ada Wali Kelas</option>
+                    <% guruList.forEach(guru => { %>
+                        <option value="<%= guru.id %>" <%= (kelas.wali_kelas == guru.id) ? 'selected' : '' %>
+                            data-nip="<%= guru.nip %>" 
+                            title="<%= guru.nama_guru %> (NIP: <%= guru.nip %>)">
+                            <%= guru.nama_guru %> (NIP: <%= guru.nip %>)
+                        </option>
+                    <% }) %>
+                </select>
+                <div class="form-text">Jika kelas tidak memiliki wali kelas, pilih "Tidak Ada Wali Kelas"</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="tahun_pelajaran" class="form-label">Tahun Pelajaran</label>
+                <input type="text" class="form-control" id="tahun_pelajaran" name="tahun_pelajaran" 
+                       value="<%= kelas.tahun_pelajaran %>" placeholder="Contoh: 2023/2024" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="jumlah_siswa" class="form-label">Jumlah Siswa</label>
+                <input type="number" class="form-control" id="jumlah_siswa" name="jumlah_siswa" 
+                       min="0" value="<%= kelas.jumlah_siswa || 0 %>" placeholder="Jumlah siswa dalam kelas" readonly disabled>
+                <small class="text-muted">Jumlah siswa akan dihitung otomatis berdasarkan data siswa yang terdaftar di kelas ini</small>
+            </div>
+            
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">Update Kelas</button>
+                <a href="/kelas" class="btn btn-secondary">Batal</a>
+            </div>
+        </div>
+    </div>
+</form>

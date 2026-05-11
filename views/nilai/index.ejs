@@ -1,0 +1,159 @@
+<% layout('layout') -%>
+
+<div class="dashboard-content">
+    <!-- Alert Messages -->
+    <% if (success && success.length > 0) { %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i><%= success[0] %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+    
+    <% if (error && error.length > 0) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i><%= error[0] %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-clipboard-data me-2 text-primary"></i>Input Nilai Siswa</h2>
+        <a href="/nilai/create" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>Tambah Nilai
+        </a>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" action="/nilai" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Kelas</label>
+                    <select name="kelas_id" class="form-select">
+                        <option value="">Semua Kelas</option>
+                        <% if (kelasList && kelasList.length > 0) { %>
+                            <% kelasList.forEach(kelas => { %>
+                                <option value="<%= kelas.id %>" <%= filters.kelas_id == kelas.id ? 'selected' : '' %>>
+                                    <%= kelas.nama_kelas %>
+                                </option>
+                            <% }); %>
+                        <% } %>
+                    </select>
+                </div>
+                
+                <div class="col-md-3">
+                    <label class="form-label">Mata Pelajaran</label>
+                    <select name="mapel_id" class="form-select">
+                        <option value="">Semua Mapel</option>
+                        <% if (mapelList && mapelList.length > 0) { %>
+                            <% mapelList.forEach(mapel => { %>
+                                <option value="<%= mapel.id %>" <%= filters.mapel_id == mapel.id ? 'selected' : '' %>>
+                                    <%= mapel.nama_mapel %>
+                                </option>
+                            <% }); %>
+                        <% } %>
+                    </select>
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label">Jenis Nilai</label>
+                    <select name="jenis_nilai" class="form-select">
+                        <option value="">Semua</option>
+                        <option value="formatif" <%= filters.jenis_nilai === 'formatif' ? 'selected' : '' %>>Formatif</option>
+                        <option value="sumatif" <%= filters.jenis_nilai === 'sumatif' ? 'selected' : '' %>>Sumatif</option>
+                    </select>
+                </div>
+                
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search me-2"></i>Filter
+                    </button>
+                    <a href="/nilai" class="btn btn-secondary">
+                        <i class="bi bi-x-circle me-2"></i>Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Nilai Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>No</th>
+                            <th>Siswa</th>
+                            <th>NIS</th>
+                            <th>Kelas</th>
+                            <th>Mata Pelajaran</th>
+                            <th>Jenis Nilai</th>
+                            <th>Kategori</th>
+                            <th>Nilai</th>
+                            <th>Tanggal</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (nilaiList && nilaiList.length > 0) { %>
+                            <% nilaiList.forEach((nilai, index) => { %>
+                                <tr>
+                                    <td><%= index + 1 %></td>
+                                    <td><strong><%= nilai.nama_siswa || '-' %></strong></td>
+                                    <td><%= nilai.nis || '-' %></td>
+                                    <td><%= nilai.nama_kelas || '-' %></td>
+                                    <td><%= nilai.nama_mapel || '-' %></td>
+                                    <td>
+                                        <span class="badge <%= nilai.jenis_nilai === 'formatif' ? 'bg-info' : 'bg-success' %>">
+                                            <%= nilai.jenis_nilai === 'formatif' ? 'Formatif' : 'Sumatif' %>
+                                        </span>
+                                    </td>
+                                    <td><%= nilai.kategori %></td>
+                                    <td>
+                                        <span class="badge <%= nilai.nilai >= 75 ? 'bg-success' : nilai.nilai >= 60 ? 'bg-warning' : 'bg-danger' %>">
+                                            <%= parseFloat(nilai.nilai).toFixed(2) %>
+                                        </span>
+                                    </td>
+                                    <td><%= new Date(nilai.tanggal_penilaian).toLocaleDateString('id-ID') %></td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="/nilai/<%= nilai.id %>/edit" class="btn btn-sm btn-outline-primary" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <form method="POST" action="/nilai/<%= nilai.id %>?_method=DELETE" style="display:inline;"
+                                                  onsubmit="return confirm('Apakah Anda yakin ingin menghapus nilai ini?')">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="10" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox" style="font-size: 3rem; display: block; margin-bottom: 1rem;"></i>
+                                    Belum ada data nilai
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Auto scroll to top when flash message exists -->
+<% if ((success && success.length > 0) || (error && error.length > 0)) { %>
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+<% } %>

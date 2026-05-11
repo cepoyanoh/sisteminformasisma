@@ -1,0 +1,229 @@
+<% layout('layout') -%>
+
+<div class="dashboard-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-plus-circle me-2 text-primary"></i>Tambah Nilai Baru</h2>
+        <a href="/nilai" class="btn btn-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Kembali
+        </a>
+    </div>
+
+    <!-- Error Messages -->
+    <% if (errors && errors.length > 0) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <ul class="mb-0">
+                <% errors.forEach(err => { %>
+                    <li><%= err %></li>
+                <% }); %>
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <form method="POST" action="/nilai" id="formNilai">
+                <!-- Bagian 1: Pilihan Mapel, Kelas, dan Info Nilai -->
+                <div class="row mb-4">
+                    <div class="col-md-4 mb-3">
+                        <label for="mapel_id" class="form-label">Mata Pelajaran <span class="text-danger">*</span></label>
+                        <select class="form-select" id="mapel_id" name="mapel_id" required>
+                            <option value="">Pilih Mata Pelajaran</option>
+                            <% if (mapelList && mapelList.length > 0) { %>
+                                <% mapelList.forEach(mapel => { %>
+                                    <option value="<%= mapel.id %>"><%= mapel.nama_mapel %></option>
+                                <% }); %>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label for="kelas_id" class="form-label">Kelas <span class="text-danger">*</span></label>
+                        <select class="form-select" id="kelas_id" name="kelas_id" required>
+                            <option value="">Pilih Kelas</option>
+                            <% if (kelasList && kelasList.length > 0) { %>
+                                <% kelasList.forEach(kelas => { %>
+                                    <option value="<%= kelas.id %>"><%= kelas.nama_kelas %></option>
+                                <% }); %>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label for="guru_id" class="form-label">Guru <span class="text-danger">*</span></label>
+                        <select class="form-select" id="guru_id" name="guru_id" required 
+                                <%= user.role === 'guru' ? 'disabled' : '' %>>
+                            <option value="">Pilih Guru</option>
+                            <% if (guruList && guruList.length > 0) { %>
+                                <% guruList.forEach(guru => { %>
+                                    <option value="<%= guru.id %>">
+                                        <%= guru.nama_guru %>
+                                    </option>
+                                <% }); %>
+                            <% } %>
+                        </select>
+                        <% if (user.role === 'guru') { %>
+                            <input type="hidden" name="guru_id" value="<%= user.id %>">
+                        <% } %>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-3 mb-3">
+                        <label for="jenis_nilai" class="form-label">Jenis Nilai <span class="text-danger">*</span></label>
+                        <select class="form-select" id="jenis_nilai" name="jenis_nilai" required>
+                            <option value="">Pilih Jenis Nilai</option>
+                            <option value="formatif">Formatif</option>
+                            <option value="sumatif">Sumatif</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label for="kategori" class="form-label">Kategori <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="kategori" name="kategori" 
+                               placeholder="Contoh: UH1, UH2, UTS" required>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label for="tanggal_penilaian" class="form-label">Tanggal Penilaian <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="tanggal_penilaian" name="tanggal_penilaian" required>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label for="keterangan" class="form-label">Keterangan</label>
+                        <input type="text" class="form-control" id="keterangan" name="keterangan" 
+                               placeholder="Keterangan opsional">
+                    </div>
+                </div>
+
+                <!-- Bagian 2: Tabel Siswa untuk Input Nilai -->
+                <div class="mb-3">
+                    <h5 class="mb-3"><i class="bi bi-people me-2"></i>Daftar Siswa - Input Nilai</h5>
+                    
+                    <!-- Hidden input untuk menyimpan data siswa dari server -->
+                    <input type="hidden" id="siswaData" value='<%- JSON.stringify(siswaList || []).replace(/'/g, "&#39;").replace(/"/g, "&quot;") %>'>
+                    
+                    <div id="siswaTableContainer" style="display: none;">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Masukkan nilai untuk setiap siswa pada kolom yang tersedia (0-100)
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" id="siswaTable">
+                                <thead class="table-primary">
+                                    <tr>
+                                        <th style="width: 50px;">No</th>
+                                        <th>NIS</th>
+                                        <th>Nama Siswa</th>
+                                        <th style="width: 150px;">Nilai</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="siswaTableBody">
+                                    <!-- Siswa akan diisi secara dinamis -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-save me-2"></i>Simpan Semua Nilai
+                            </button>
+                            <a href="/nilai" class="btn btn-secondary btn-lg ms-2">
+                                <i class="bi bi-x-circle me-2"></i>Batal
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div id="emptyState" class="text-center py-5 text-muted">
+                        <i class="bi bi-arrow-up-circle" style="font-size: 3rem;"></i>
+                        <p class="mt-3">Silakan pilih <strong>Mata Pelajaran</strong> dan <strong>Kelas</strong> untuk menampilkan daftar siswa</p>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Set default date to today
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('tanggal_penilaian').value = today;
+    
+    // Retrieve student data from hidden input
+    const siswaDataElement = document.getElementById('siswaData');
+    let allStudents = [];
+    try {
+        allStudents = JSON.parse(siswaDataElement.value || '[]');
+    } catch (e) {
+        console.error('Error parsing siswa data:', e);
+        allStudents = [];
+    }
+    
+    const siswaTableContainer = document.getElementById('siswaTableContainer');
+    const emptyState = document.getElementById('emptyState');
+    const siswaTableBody = document.getElementById('siswaTableBody');
+    const mapelSelect = document.getElementById('mapel_id');
+    const kelasSelect = document.getElementById('kelas_id');
+    
+    // Function to display students in table
+    function displaySiswaTable(kelasId) {
+        // Clear table
+        siswaTableBody.innerHTML = '';
+        
+        // Filter students by class
+        const filteredStudents = allStudents.filter(siswa => siswa.kelas_id == kelasId);
+        
+        if (filteredStudents.length === 0) {
+            siswaTableContainer.style.display = 'none';
+            emptyState.style.display = 'block';
+            emptyState.innerHTML = '<i class="bi bi-exclamation-triangle" style="font-size: 3rem;"></i><p class="mt-3">Tidak ada siswa di kelas yang dipilih</p>';
+            return;
+        }
+        
+        // Show table container
+        siswaTableContainer.style.display = 'block';
+        emptyState.style.display = 'none';
+        
+        // Populate table with students
+        filteredStudents.forEach((siswa, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="text-center">${index + 1}</td>
+                <td>${siswa.nis || '-'}</td>
+                <td>${siswa.nama_siswa}</td>
+                <td>
+                    <input type="hidden" name="siswa_ids[]" value="${siswa.id}">
+                    <input type="number" class="form-control form-control-sm" 
+                           name="nilai_siswa_${siswa.id}" 
+                           min="0" max="100" step="0.01" 
+                           placeholder="0-100"
+                           required>
+                </td>
+            `;
+            siswaTableBody.appendChild(row);
+        });
+    }
+    
+    // Check if both mapel and kelas are selected
+    function checkAndDisplayTable() {
+        const mapelId = mapelSelect.value;
+        const kelasId = kelasSelect.value;
+        
+        if (mapelId && kelasId) {
+            displaySiswaTable(kelasId);
+        } else {
+            siswaTableContainer.style.display = 'none';
+            emptyState.style.display = 'block';
+            emptyState.innerHTML = '<i class="bi bi-arrow-up-circle" style="font-size: 3rem;"></i><p class="mt-3">Silakan pilih <strong>Mata Pelajaran</strong> dan <strong>Kelas</strong> untuk menampilkan daftar siswa</p>';
+        }
+    }
+    
+    // Event listeners for dropdown changes
+    mapelSelect.addEventListener('change', checkAndDisplayTable);
+    kelasSelect.addEventListener('change', checkAndDisplayTable);
+    
+    // Initialize
+    checkAndDisplayTable();
+});
+</script>

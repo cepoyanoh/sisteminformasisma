@@ -1,0 +1,206 @@
+<% layout('layout') -%>
+
+<div class="dashboard-content">
+    <!-- Alert Messages -->
+    <% if (success && success.length > 0) { %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i><%= success[0] %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+    
+    <% if (error && error.length > 0) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i><%= error[0] %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+    
+    <% if (warning && warning.length > 0) { %>
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle-fill me-2"></i><%= warning[0] %>
+            <% if (errors && errors.length > 0) { %>
+                <ul class="mb-0 mt-2">
+                    <% errors.slice(0, 5).forEach(err => { %>
+                        <li><%= err %></li>
+                    <% }); %>
+                    <% if (errors.length > 5) { %>
+                        <li>... dan <%= errors.length - 5 %> error lainnya</li>
+                    <% } %>
+                </ul>
+            <% } %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+
+    <!-- Search Form -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" action="/siswa" class="row g-3">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" 
+                               class="form-control" 
+                               name="search" 
+                               placeholder="Cari berdasarkan Nama, NIS, atau NISN..." 
+                               value="<%= search || '' %>"
+                               autocomplete="off">
+                        <% if (search) { %>
+                            <a href="/siswa" class="btn btn-outline-secondary" title="Hapus pencarian">
+                                <i class="bi bi-x-circle"></i>
+                            </a>
+                        <% } %>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-2"></i>Cari
+                    </button>
+                </div>
+            </form>
+            <% if (search) { %>
+                <small class="text-muted mt-2 d-block">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Menampilkan hasil pencarian untuk: "<strong><%= search %></strong>"
+                </small>
+            <% } %>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-people-fill me-2 text-primary"></i>Data Siswa</h2>
+        <div class="d-flex gap-2">
+            <!-- Sort Buttons -->
+            <div class="btn-group" role="group">
+                <a href="/siswa?sort=nama" class="btn btn-sm <%= sortBy === 'nama' ? 'btn-primary' : 'btn-outline-primary' %>">
+                    <i class="bi bi-sort-alpha-down me-1"></i>Urutkan Nama
+                </a>
+                <a href="/siswa?sort=kelas" class="btn btn-sm <%= sortBy === 'kelas' ? 'btn-primary' : 'btn-outline-primary' %>">
+                    <i class="bi bi-sort-down me-1"></i>Urutkan Kelas
+                </a>
+            </div>
+            
+            <a href="/siswa/import" class="btn btn-success">
+                <i class="bi bi-file-earmark-spreadsheet me-2"></i>Import Excel
+            </a>
+            <a href="/siswa/tambah" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Tambah Siswa
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <% if (siswaList && siswaList.length > 0) { %>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <span class="badge bg-primary fs-6">
+                            <i class="bi bi-people-fill me-1"></i>
+                            Total: <%= siswaList.length %> siswa
+                        </span>
+                        <% if (search) { %>
+                            <span class="badge bg-info fs-6 ms-2">
+                                <i class="bi bi-funnel-fill me-1"></i>
+                                Hasil pencarian
+                            </span>
+                        <% } %>
+                    </div>
+                </div>
+            <% } %>
+            
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>No</th>
+                            <th>NIS</th>
+                            <th>NISN</th>
+                            <th>
+                                <% if (sortBy === 'nama') { %>
+                                    <span class="text-primary"><i class="bi bi-sort-alpha-down me-1"></i></span>Nama Siswa
+                                <% } else { %>
+                                    Nama Siswa
+                                <% } %>
+                            </th>
+                            <th>Jenis Kelamin</th>
+                            <th>
+                                <% if (sortBy === 'kelas') { %>
+                                    <span class="text-primary"><i class="bi bi-sort-down me-1"></i></span>Kelas
+                                <% } else { %>
+                                    Kelas
+                                <% } %>
+                            </th>
+                            <th>Tahun Ajaran</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (siswaList && siswaList.length > 0) { %>
+                            <% siswaList.forEach((siswa, index) => { %>
+                                <tr>
+                                    <td><%= index + 1 %></td>
+                                    <td><%= siswa.nis || '-' %></td>
+                                    <td><%= siswa.nisn || '-' %></td>
+                                    <td><strong><%= siswa.nama_siswa %></strong></td>
+                                    <td>
+                                        <span class="badge <%= siswa.jenis_kelamin === 'L' ? 'bg-primary' : 'bg-danger' %>">
+                                            <%= siswa.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' %>
+                                        </span>
+                                    </td>
+                                    <td><%= siswa.nama_kelas || '-' %></td>
+                                    <td><%= siswa.tahun_ajaran || '-' %></td>
+                                    <td>
+                                        <span class="badge <%= siswa.status === 'aktif' ? 'bg-success' : siswa.status === 'non-aktif' ? 'bg-warning' : 'bg-secondary' %>">
+                                            <%= siswa.status || 'aktif' %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="/siswa/edit/<%= siswa.id %>" class="btn btn-sm btn-outline-primary" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="/siswa/hapus/<%= siswa.id %>?sort=<%= sortBy %><% if (search) { %>&search=<%= encodeURIComponent(search) %><% } %>" class="btn btn-sm btn-outline-danger" 
+                                               onclick="return confirm('Apakah Anda yakin ingin menghapus data siswa <%= siswa.nama_siswa %>?')" title="Hapus">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="9" class="text-center text-muted py-5">
+                                    <% if (search) { %>
+                                        <i class="bi bi-search" style="font-size: 3rem; display: block; margin-bottom: 1rem; color: #6c757d;"></i>
+                                        <h5 class="text-muted">Tidak ada hasil untuk "<%= search %>"</h5>
+                                        <p class="mb-0">Coba gunakan kata kunci yang berbeda atau <a href="/siswa">lihat semua data siswa</a></p>
+                                    <% } else { %>
+                                        <i class="bi bi-inbox" style="font-size: 3rem; display: block; margin-bottom: 1rem; color: #6c757d;"></i>
+                                        <h5 class="text-muted">Belum ada data siswa</h5>
+                                        <p class="mb-0">Silakan <a href="/siswa/tambah">tambah siswa baru</a> atau <a href="/siswa/import">import dari Excel</a></p>
+                                    <% } %>
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Auto scroll to top when flash message exists -->
+<% if ((success && success.length > 0) || (error && error.length > 0) || (warning && warning.length > 0)) { %>
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+<% } %>

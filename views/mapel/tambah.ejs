@@ -1,0 +1,55 @@
+<% layout('layout') -%>
+
+<h3>Tambah Mata Pelajaran Baru</h3>
+
+<!-- Flash Messages -->
+<% if (typeof success !== 'undefined' && success.length > 0) { %>
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <%= success %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+<% } %>
+
+<% if (typeof error !== 'undefined' && error.length > 0) { %>
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <%= error %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+<% } %>
+
+<form method="POST" action="/mapel/tambah">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="nama_mapel" class="form-label">Nama Mata Pelajaran <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="nama_mapel" name="nama_mapel" required placeholder="Contoh: Matematika, Fisika, Bahasa Indonesia">
+                <small class="text-muted">Kode mapel akan otomatis dibuat dari 3 huruf pertama</small>
+            </div>
+            
+            <div class="mb-3">
+                <label for="kategori" class="form-label">Kategori <span class="text-danger">*</span></label>
+                <select class="form-select" id="kategori" name="kategori" required>
+                    <option value="">Pilih Kategori</option>
+                    <option value="Wajib">Wajib</option>
+                    <option value="Pilihan">Pilihan</option>
+                    <option value="Muatan Lokal">Muatan Lokal</option>
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="jam_pembelajaran" class="form-label">Jumlah Jam Pembelajaran (JP) <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" id="jam_pembelajaran" name="jam_pembelajaran" min="1" required placeholder="Contoh: 4">
+                <small class="text-muted">Minimal 1 jam pembelajaran</small>
+            </div>
+            
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Simpan Mata Pelajaran
+                </button>
+                <a href="/mapel" class="btn btn-secondary">
+                    <i class="bi bi-x-circle"></i> Batal
+                </a>
+            </div>
+        </div>
+    </div>
+</form>

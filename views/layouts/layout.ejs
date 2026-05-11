@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .header-bg {
+            background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+            color: white;
+        }
+        .main-content {
+            min-height: calc(100vh - 200px);
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 1rem 0;
+            margin-top: 2rem;
+            border-top: 1px solid #dee2e6;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .menu-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .menu-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+        .menu-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header-bg py-3 mb-4">
+        <div class="container-fluid">
+            <div class="d-flex flex-wrap align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <h3 class="text-white mb-0">SMA Negeri 12 Pontianak</h3>
+                </div>
+                <% if (typeof user !== 'undefined' && user) { %>
+                <div class="text-end user-info">
+                    <div>
+                        <span class="text-light">Halo, <strong><%= user.nama %></strong></span><br>
+                        <small class="text-light"><%= user.role === 'tata_usaha' ? 'Tata Usaha' : 'Guru' %></small>
+                    </div>
+                    <a href="/logout" class="btn btn-outline-light btn-sm">Logout</a>
+                </div>
+                <% } else { %>
+                <div class="text-end">
+                    <span class="text-light">Sistem Informasi Manajemen Kurikulum</span>
+                </div>
+                <% } %>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content px-4 py-4">
+        <div class="container-fluid">
+            <%- body %>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer mt-5">
+        <div class="container">
+            <div class="text-center">
+                <p class="mb-0">&copy; 2026 SMA Negeri 12 Pontianak. Semua Hak Dilindungi.</p>
+                <p class="mb-0">Sistem Informasi Manajemen Kurikulum</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

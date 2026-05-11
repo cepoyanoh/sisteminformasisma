@@ -1,0 +1,131 @@
+<% layout('layout') -%>
+
+<h3>Edit Jurnal Guru</h3>
+
+<form method="POST" action="/jurnal/edit/<%= jurnal.id %>">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="guru_id" class="form-label">Nama Guru</label>
+                <select class="form-select" id="guru_id" name="guru_id" required>
+                    <option value="">Pilih Guru</option>
+                    <% guruList.forEach(guru => { %>
+                        <option value="<%= guru.id %>" <%= jurnal.guru_id == guru.id ? 'selected' : '' %>><%= guru.nama_guru %> (<%= guru.nip %>)</option>
+                    <% }) %>
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="tanggal" class="form-label">Tanggal</label>
+                <input type="date" class="form-control" id="tanggal" name="tanggal" value="<%= jurnal.tanggal %>" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="jam_ke" class="form-label">Jam Ke-</label>
+                <input type="number" class="form-control" id="jam_ke" name="jam_ke" min="1" max="10" value="<%= jurnal.jam_ke %>" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="kelas_id" class="form-label">Kelas</label>
+                <select class="form-select" id="kelas_id" name="kelas_id" required onchange="updateJumlahSiswa()">
+                    <option value="">Pilih Kelas</option>
+                    <% kelasList.forEach(kelas => { %>
+                        <option value="<%= kelas.id %>" data-jumlah-siswa="<%= kelas.jumlah_siswa || 0 %>" <%= jurnal.kelas_id == kelas.id ? 'selected' : '' %>><%= kelas.nama_kelas %> (<%= kelas.jumlah_siswa || 0 %> siswa)</option>
+                    <% }) %>
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="mapel_id" class="form-label">Mata Pelajaran</label>
+                <select class="form-select" id="mapel_id" name="mapel_id" required>
+                    <option value="">Pilih Mata Pelajaran</option>
+                    <% mapelList.forEach(mapel => { %>
+                        <option value="<%= mapel.id %>" <%= jurnal.mapel_id == mapel.id ? 'selected' : '' %>><%= mapel.nama_mapel %></option>
+                    <% }) %>
+                </select>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="materi" class="form-label">Materi Pokok</label>
+                <textarea class="form-control" id="materi" name="materi" rows="3" required><%= jurnal.materi %></textarea>
+            </div>
+            
+            <div class="mb-3">
+                <label for="metode_pembelajaran" class="form-label">Metode Pembelajaran</label>
+                <input type="text" class="form-control" id="metode_pembelajaran" name="metode_pembelajaran" value="<%= jurnal.metode_pembelajaran || '' %>">
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="jumlah_siswa_display" class="form-label">Jumlah Siswa (diambil dari data kelas)</label>
+                        <input type="number" class="form-control" id="jumlah_siswa_display" name="jumlah_siswa_display" min="0" readonly value="<%= jurnal.kelas_jumlah_siswa || jurnal.jumlah_siswa || 0 %>">
+                        <input type="hidden" id="jumlah_siswa" name="jumlah_siswa" value="<%= jurnal.kelas_jumlah_siswa || jurnal.jumlah_siswa || 0 %>">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="hadir" class="form-label">Jumlah Hadir</label>
+                        <input type="number" class="form-control" id="hadir" name="hadir" min="0" value="<%= jurnal.hadir || 0 %>">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="sakit" class="form-label">Sakit</label>
+                        <input type="number" class="form-control" id="sakit" name="sakit" min="0" value="<%= jurnal.sakit || 0 %>">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="izin" class="form-label">Izin</label>
+                        <input type="number" class="form-control" id="izin" name="izin" min="0" value="<%= jurnal.izin || 0 %>">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="alpha" class="form-label">Alpha</label>
+                        <input type="number" class="form-control" id="alpha" name="alpha" min="0" value="<%= jurnal.alpha || 0 %>">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="catatan" class="form-label">Catatan</label>
+                <textarea class="form-control" id="catatan" name="catatan" rows="2"><%= jurnal.catatan || '' %></textarea>
+            </div>
+            
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">Update Jurnal</button>
+                <a href="/jurnal" class="btn btn-secondary">Batal</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    function updateJumlahSiswa() {
+        const kelasSelect = document.getElementById('kelas_id');
+        const jumlahSiswaDisplay = document.getElementById('jumlah_siswa_display');
+        const jumlahSiswaHidden = document.getElementById('jumlah_siswa');
+        
+        if (kelasSelect.value) {
+            const selectedOption = kelasSelect.options[kelasSelect.selectedIndex];
+            const jumlahSiswa = selectedOption.getAttribute('data-jumlah-siswa');
+            jumlahSiswaDisplay.value = jumlahSiswa;
+            jumlahSiswaHidden.value = jumlahSiswa;
+        } else {
+            jumlahSiswaDisplay.value = '<%= jurnal.kelas_jumlah_siswa || jurnal.jumlah_siswa || 0 %>';
+            jumlahSiswaHidden.value = '<%= jurnal.kelas_jumlah_siswa || jurnal.jumlah_siswa || 0 %>';
+        }
+    }
+
+    // Initialize the jumlah siswa field on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        updateJumlahSiswa();
+    });
+</script>

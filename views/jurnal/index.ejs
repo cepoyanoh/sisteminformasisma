@@ -1,0 +1,93 @@
+<% layout('layout') -%>
+
+<!-- Flash Messages -->
+<% if (typeof success !== 'undefined' && success.length > 0) { %>
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i><%= success %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+<% } %>
+
+<% if (typeof error !== 'undefined' && error.length > 0) { %>
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i><%= error %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+<% } %>
+
+<% if (typeof warning !== 'undefined' && warning.length > 0) { %>
+  <div class="alert alert-warning alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-circle-fill me-2"></i><%= warning %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+<% } %>
+
+<div class="d-flex justify-content-between flex-wrap align-items-center mb-3">
+    <h3>Jurnal Guru</h3>
+    <a href="/jurnal/tambah" class="btn btn-primary">Tambah Jurnal Baru</a>
+</div>
+
+<% if (jurnalList && jurnalList.length > 0) { %>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>No</th>
+                    <th>Nama Guru</th>
+                    <th>Tanggal</th>
+                    <th>Jam Ke</th>
+                    <th>Kelas</th>
+                    <th>Mata Pelajaran</th>
+                    <th>Jml Siswa</th>
+                    <th>Hadir</th>
+                    <th>Sakit</th>
+                    <th>Izin</th>
+                    <th>Alpha</th>
+                    <th>Materi</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% jurnalList.forEach((jurnal, index) => { %>
+                    <tr>
+                        <td><%= index + 1 %></td>
+                        <td><%= jurnal.nama_guru %></td>
+                        <td><%= new Date(jurnal.tanggal).toLocaleDateString('id-ID') %></td>
+                        <td>Jam <%= jurnal.jam_ke %></td>
+                        <td><%= jurnal.nama_kelas %> (<%= jurnal.kelas_jumlah_siswa || jurnal.jumlah_siswa || 0 %> siswa)</td>
+                        <td><%= jurnal.nama_mapel %></td>
+                        <td><%= jurnal.kelas_jumlah_siswa || jurnal.jumlah_siswa || 0 %></td>
+                        <td><%= jurnal.hadir || 0 %></td>
+                        <td><%= jurnal.sakit || 0 %></td>
+                        <td><%= jurnal.izin || 0 %></td>
+                        <td><%= jurnal.alpha || 0 %></td>
+                        <td><%= jurnal.materi.substring(0, 20) %><%= jurnal.materi.length > 20 ? '...' : '' %></td>
+                        <td>
+                            <a href="/jurnal/edit/<%= jurnal.id %>" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <a href="/jurnal/hapus/<%= jurnal.id %>" class="btn btn-sm btn-outline-danger" 
+                               onclick="return confirm('Yakin ingin menghapus jurnal guru <%= jurnal.nama_guru %> pada tanggal <%= jurnal.tanggal %>?')">Hapus</a>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+<% } else { %>
+    <div class="alert alert-info">
+        Belum ada data jurnal guru. <a href="/jurnal/tambah">Tambah jurnal baru</a>
+    </div>
+<% } %>
+
+<!-- Auto scroll to top when flash message exists -->
+<% if ((typeof success !== 'undefined' && success.length > 0) || 
+        (typeof error !== 'undefined' && error.length > 0) || 
+        (typeof warning !== 'undefined' && warning.length > 0)) { %>
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+<% } %>

@@ -1,0 +1,72 @@
+<% layout('layout') -%>
+
+<div class="dashboard-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-pencil me-2 text-primary"></i>Edit User</h2>
+        <a href="/users" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-2"></i>Kembali
+        </a>
+    </div>
+
+    <% if (error && error.length > 0) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i><%= error %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <form method="POST" action="/users/edit/<%= user.id %>">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="username" name="username" 
+                               value="<%= user.username %>" required>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="password" class="form-label">Password Baru</label>
+                        <input type="password" class="form-control" id="password" name="password" 
+                               placeholder="Kosongkan jika tidak ingin mengubah password">
+                        <small class="text-muted">Kosongkan jika tidak ingin mengubah password</small>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
+                        <select class="form-select" id="role" name="role" required>
+                            <option value="">Pilih Role</option>
+                            <% if (user && user.role === 'super_admin') { %>
+                                <option value="super_admin" <%= user.role === 'super_admin' ? 'selected' : '' %>>Tata Usaha (Super Admin)</option>
+                                <option value="admin" <%= user.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                            <% } else if (user.role === 'admin') { %>
+                                <option value="admin" selected>Admin</option>
+                            <% } %>
+                            <option value="guru" <%= user.role === 'guru' ? 'selected' : '' %>>Guru</option>
+                            <option value="siswa" <%= user.role === 'siswa' ? 'selected' : '' %>>Siswa</option>
+                        </select>
+                    </div>
+
+                    <!-- GET /users/edit/:id - Form edit user -->
+                    <div class="col-md-6 mb-3" id="isActiveField">
+                        <label for="is_active" class="form-label">Status Akun</label>
+                        <select class="form-select" id="is_active" name="is_active">
+                            <option value="1" <%= user.is_active ? 'selected' : '' %>>Aktif</option>
+                            <option value="0" <%= !user.is_active ? 'selected' : '' %>>Nonaktif (Suspend)</option>
+                        </select>
+                        <small class="text-muted">User yang dinonaktifkan tidak dapat login</small>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-2"></i>Update User
+                    </button>
+                    <a href="/users" class="btn btn-secondary">
+                        <i class="bi bi-x-circle me-2"></i>Batal
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

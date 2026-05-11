@@ -1,0 +1,245 @@
+<% layout('layout') -%>
+
+<div class="dashboard-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-calendar-check me-2 text-primary"></i>Absensi Siswa</h2>
+        <div class="d-flex gap-2">
+            <a href="/" class="btn btn-outline-secondary">
+                <i class="bi bi-house-door me-2"></i>Kembali ke Dashboard
+            </a>
+            <a href="/absensi/input" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Input Absensi
+            </a>
+            <a href="/absensi/rekap-harian" class="btn btn-info">
+                <i class="bi bi-calendar-day me-2"></i>Rekap Harian
+            </a>
+            <a href="/absensi/rekap" class="btn btn-warning">
+                <i class="bi bi-bar-chart me-2"></i>Rekap Bulanan
+            </a>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    <% if (success && success.length > 0) { %>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i><%= success %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+    
+    <% if (error && error.length > 0) { %>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i><%= error %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <% } %>
+
+    <!-- Filter -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" action="/absensi" class="row g-3">
+                <div class="col-md-2">
+                    <label for="tanggal" class="form-label">Tanggal</label>
+                    <input type="date" class="form-control" id="tanggal" name="tanggal" 
+                           value="<%= selectedTanggal %>">
+                </div>
+                <div class="col-md-2">
+                    <label for="kelas_id" class="form-label">Kelas</label>
+                    <select class="form-select" id="kelas_id" name="kelas_id">
+                        <option value="">Semua Kelas</option>
+                        <% kelasList.forEach(kelas => { %>
+                            <option value="<%= kelas.id %>" <%= selectedKelas == kelas.id ? 'selected' : '' %>>
+                                <%= kelas.nama_kelas %>
+                            </option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="">Semua Status</option>
+                        <option value="hadir" <%= selectedStatus == 'hadir' ? 'selected' : '' %>>Hadir</option>
+                        <option value="sakit" <%= selectedStatus == 'sakit' ? 'selected' : '' %>>Sakit</option>
+                        <option value="izin" <%= selectedStatus == 'izin' ? 'selected' : '' %>>Izin</option>
+                        <option value="tidak_hadir" <%= selectedStatus == 'tidak_hadir' || selectedStatus == 'alpha' || selectedStatus == 'alpa' ? 'selected' : '' %>>Tidak Hadir</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="guru_id" class="form-label">Guru</label>
+                    <select class="form-select" id="guru_id" name="guru_id">
+                        <option value="">Semua Guru</option>
+                        <% if (guruList && guruList.length > 0) { %>
+                            <% guruList.forEach(guru => { %>
+                                <option value="<%= guru.id %>" <%= selectedGuru == guru.id ? 'selected' : '' %>>
+                                    <%= guru.nama_guru %>
+                                </option>
+                            <% }); %>
+                        <% } %>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="mapel_id" class="form-label">Mata Pelajaran</label>
+                    <select class="form-select" id="mapel_id" name="mapel_id">
+                        <option value="">Semua Mapel</option>
+                        <% if (mapelList && mapelList.length > 0) { %>
+                            <% mapelList.forEach(mapel => { %>
+                                <option value="<%= mapel.id %>" <%= selectedMapel == mapel.id ? 'selected' : '' %>>
+                                    <%= mapel.nama_mapel %>
+                                </option>
+                            <% }); %>
+                        <% } %>
+                    </select>
+                </div>
+                <div class="col-md-12 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-2"></i>Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabel Absensi -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <!-- Status Summary Cards -->
+            <% if (absensiList && absensiList.length > 0) { %>
+                <% 
+                // Calculate status counts (with typo fix)
+                const statusCounts = {
+                    hadir: absensiList.filter(a => a.status_kehadiran === 'hadir').length,
+                    sakit: absensiList.filter(a => a.status_kehadiran === 'sakit').length,
+                    izin: absensiList.filter(a => a.status_kehadiran === 'izin').length,
+                    tidak_hadir: absensiList.filter(a => a.status_kehadiran === 'tidak_hadir' || a.status_kehadiran === 'alpha' || a.status_kehadiran === 'alpa').length
+                };
+                %>
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body text-center">
+                                <h3 class="mb-0"><%= statusCounts.hadir %></h3>
+                                <small>Hadir</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-warning text-dark">
+                            <div class="card-body text-center">
+                                <h3 class="mb-0"><%= statusCounts.sakit %></h3>
+                                <small>Sakit</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-info text-white">
+                            <div class="card-body text-center">
+                                <h3 class="mb-0"><%= statusCounts.izin %></h3>
+                                <small>Izin</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-danger text-white">
+                            <div class="card-body text-center">
+                                <h3 class="mb-0"><%= statusCounts.tidak_hadir %></h3>
+                                <small>Tidak Hadir</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+            
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>No</th>
+                            <th>NIS</th>
+                            <th>Nama Siswa</th>
+                            <th>Kelas</th>
+                            <th>Mapel</th>
+                            <th>Guru</th>
+                            <th>Tanggal</th>
+                            <th>Status</th>
+                            <th>Keterangan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (absensiList && absensiList.length > 0) { %>
+                            <% 
+                            // Sort: Tidak Hadir first, then Sakit, Izin, Hadir
+                            const sortedList = [...absensiList].sort((a, b) => {
+                                const statusOrder = { 'tidak_hadir': 0, 'alpha': 0, 'alpa': 0, 'sakit': 1, 'izin': 2, 'hadir': 3 };
+                                // Normalize old values
+                                const normalizeStatus = (s) => {
+                                    if (s === 'alpha' || s === 'alpa') return 'tidak_hadir';
+                                    return s;
+                                };
+                                const statusA = normalizeStatus(a.status_kehadiran);
+                                const statusB = normalizeStatus(b.status_kehadiran);
+                                return (statusOrder[statusA] || 99) - (statusOrder[statusB] || 99);
+                            });
+                            %>
+                            <% sortedList.forEach((absensi, index) => { %>
+                                <% 
+                                // Normalize status
+                                const status = (absensi.status_kehadiran === 'alpa' || absensi.status_kehadiran === 'alpha') ? 'tidak_hadir' : absensi.status_kehadiran;
+                                
+                                const statusBadge = {
+                                    'hadir': 'bg-success',
+                                    'sakit': 'bg-warning',
+                                    'izin': 'bg-info',
+                                    'tidak_hadir': 'bg-danger'
+                                };
+                                const statusLabel = {
+                                    'hadir': 'Hadir',
+                                    'sakit': 'Sakit',
+                                    'izin': 'Izin',
+                                    'tidak_hadir': 'Tidak Hadir'
+                                };
+                                
+                                // Highlight tidak_hadir rows
+                                const rowClass = status === 'tidak_hadir' ? 'table-danger' : '';
+                                %>
+                                <tr class="<%= rowClass %>">
+                                    <td><%= index + 1 %></td>
+                                    <td><%= absensi.nis || '-' %></td>
+                                    <td><strong><%= absensi.nama_siswa || '-' %></strong></td>
+                                    <td><%= absensi.nama_kelas || '-' %></td>
+                                    <td><%= absensi.nama_mapel || '-' %></td>
+                                    <td><%= absensi.nama_guru || '-' %></td>
+                                    <td><%= new Date(absensi.tanggal).toLocaleDateString('id-ID') %></td>
+                                    <td>
+                                        <span class="badge <%= statusBadge[status] || 'bg-secondary' %>">
+                                            <%= statusLabel[status] || status || '-' %>
+                                        </span>
+                                    </td>
+                                    <td><%= (absensi.keterangan && absensi.keterangan.trim() !== '') ? absensi.keterangan : '-' %></td>
+                                </tr>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="9" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox" style="font-size: 3rem; display: block; margin-bottom: 1rem;"></i>
+                                    Belum ada data absensi untuk filter yang dipilih
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Auto scroll to top when flash message exists -->
+<% if ((success && success.length > 0) || (error && error.length > 0)) { %>
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+<% } %>
