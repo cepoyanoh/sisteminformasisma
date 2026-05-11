@@ -1,0 +1,27 @@
+# Wrangler Configuration for Sistem Informasi Akademik
+
+name = "sistem-informasi-akademik"
+main = "src/index.js"
+compatibility_date = "2024-05-11"
+
+# Environment Variables
+[vars]
+NODE_ENV = "production"
+PORT = "8080"
+SESSION_SECRET = "your-cloudflare-session-secret"
+
+# Database Configuration - D1
+[[d1_databases]]
+binding = "DB"                          # Available in your Worker on env.DB
+database_name = "sistem-akademik-db"    # The name you gave your D1 database
+database_id = ""                        # Will be automatically filled when bound to a deployed database
+
+# Environment-specific variables
+[env.production]
+account_id = "your-account-id"
+workers_dev = true
+route = ""
+zone_id = ""
+
+[env.staging]
+name = "sistem-informasi-staging"
